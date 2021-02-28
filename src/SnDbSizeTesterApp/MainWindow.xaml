@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SnDbSizeTesterApp"
         mc:Ignorable="d"
-        Title="MainWindow" Height="377" Width="496">
+        Title="MainWindow" Height="600" Width="500" Closing="Window_Closing">
     <Grid>
         <Label Content="SNaaS Repository URL:" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="161" Height="25"/>
         <!--<TextBox x:Name="ConnectionTextBox" Margin="142,10,75,0" Padding="2,4,0,0" Text="https://localhost:44362" TextWrapping="Wrap" VerticalAlignment="Top" Height="25"/>-->
@@ -14,12 +14,23 @@
         <Label x:Name="PlanLabel" Content="Plan: ?" Margin="10,40,10,0" VerticalAlignment="Top" Height="25"/>
         <ProgressBar x:Name="DataBar" HorizontalAlignment="Left" Height="26" Margin="10,65,0,0" VerticalAlignment="Top" Width="400" Value="606279" Maximum="1048576"/>
         <Label x:Name="DataBarLabel" Content="Data" HorizontalAlignment="Left" Margin="10,65,0,0" VerticalAlignment="Top" Width="161"/>
-        <ProgressBar x:Name="LogBar" HorizontalAlignment="Left" Height="26" Margin="10,96,0,0" VerticalAlignment="Top" Width="400" Value="606279" Maximum="1048576"/>
+        <ProgressBar x:Name="LogBar" HorizontalAlignment="Left" Height="26" Margin="10,96,0,0" VerticalAlignment="Top" Width="400" Value="606279" Maximum="1048576" Foreground="#FFCB9F0B"/>
         <Label x:Name="LogBarLabel" Content="TLog" HorizontalAlignment="Left" Margin="10,96,0,0" VerticalAlignment="Top" Width="161"/>
-        <ProgressBar x:Name="ContentBar" HorizontalAlignment="Left" Height="27" Margin="10,127,0,0" VerticalAlignment="Top" Width="150"/>
-        <Label x:Name="ContentBarLabel" Content="Content" HorizontalAlignment="Left" Margin="10,127,0,0" VerticalAlignment="Top" Width="150"/>
+        <ProgressBar x:Name="ContentBar" HorizontalAlignment="Left" Height="16" Margin="10,127,0,0" VerticalAlignment="Top" Width="150"/>
+        <Label x:Name="ContentBarLabel" Content="Content" Padding="4,0,0,0" HorizontalAlignment="Left" Margin="10,127,0,0" VerticalAlignment="Top" Width="150" Height="16" FontSize="10"/>
 
-        <TextBox x:Name="LogTextBox" Margin="10,181,10,10" Text="TextBox" TextWrapping="Wrap" HorizontalScrollBarVisibility="Visible"
+        <Label Content="Profiles" HorizontalAlignment="Left" Margin="10,159,0,0" VerticalAlignment="Top" Width="74"/>
+        <StackPanel Height="40" VerticalAlignment="Top" Margin="0,178,0,0" Orientation="Horizontal">
+            <Button Content="Uploader" Margin="10,4,0,4" Width="70" Click="ProfileButton_Click"/>
+            <Button Content="Cleaner"  Margin="10,4,0,4" Width="70" Click="ProfileButton_Click"/>
+            <Button Content="Editor"   Margin="10,4,0,4" Width="70" Click="ProfileButton_Click" IsEnabled="False"/>
+            <Button Content="Approver" Margin="10,4,0,4" Width="70" Click="ProfileButton_Click" IsEnabled="False"/>
+            <Button Content="Profile5" Margin="10,4,0,4" Width="70" Click="ProfileButton_Click" IsEnabled="False"/>
+            <Button Content="Profile6" Margin="10,4,0,4" Width="70" Click="ProfileButton_Click" IsEnabled="False"/>
+        </StackPanel>
+        <Button x:Name="CloseAllProfilesButton" Content="Kill All" HorizontalAlignment="Left" Margin="10,223,0,0" VerticalAlignment="Top" Width="54" Click="CloseAllProfilesButton_Click"/>
+
+        <TextBox x:Name="LogTextBox" Margin="10,268,10,10" Text="LogTextBox" TextWrapping="Wrap" HorizontalScrollBarVisibility="Visible"
                  VerticalScrollBarVisibility="Visible"/>
     </Grid>
 </Window>

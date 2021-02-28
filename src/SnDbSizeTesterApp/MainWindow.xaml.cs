@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -201,5 +202,105 @@ namespace SnDbSizeTesterApp
         {
             LogTextBox.Text += line + Environment.NewLine;
         }
+
+        private void ProfileButton_Click(object sender, RoutedEventArgs e)
+        {
+            var button = (Button) sender;
+            CreateProfile(button.Content.ToString());
+        }
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            ForgetAllProfiles();
+        }
+
+        private void ProfileWindow_Closed(object sender, EventArgs e)
+        {
+            ForgetProfile((Window) sender);
+        }
+        private void CloseAllProfilesButton_Click(object sender, RoutedEventArgs e)
+        {
+            ForgetAllProfiles();
+        }
+
+
+        private List<Window> _activeProfiles = new List<Window>();
+        private void CreateProfile(string name)
+        {
+            var profile = new Profile
+            {
+                Name = name,
+                Recurring = true,
+                WaitMilliseconds = 1250,
+            };
+            switch (name)
+            {
+                case "Uploader": profile.Action = Uploader; break;
+                case "Cleaner": profile.Action = Cleaner; break;
+                case "Editor": profile.Action = Editor; break;
+                case "Approver": profile.Action = Approver; break;
+                case "Profile5": profile.Action = Profile5; break;
+                case "Profile6": profile.Action = Profile5; break;
+                default:
+                    break;
+            }
+
+            var window = new ProfileWindow(profile);
+            _activeProfiles.Add(window);
+            window.Closed += ProfileWindow_Closed;
+            window.Show();
+        }
+        private void ForgetProfile(Window window)
+        {
+            _activeProfiles.Remove(window);
+        }
+        private void ForgetAllProfiles()
+        {
+            foreach (var window in _activeProfiles.ToArray())
+                window.Close();
+        }
+
+        private Task Uploader(CancellationToken cancel)
+        {
+            LogTextBox.Dispatcher.InvokeAsync(() =>
+            {
+                LogTextBox.Text += "/";
+            });
+            return Task.CompletedTask;
+        }
+        private Task Cleaner(CancellationToken cancel)
+        {
+            LogTextBox.Dispatcher.InvokeAsync(() =>
+            {
+                LogTextBox.Text += "\\";
+            });
+            return Task.CompletedTask;
+        }
+        private Task Editor(CancellationToken cancel)
+        {
+            LogTextBox.Dispatcher.InvokeAsync(() =>
+            {
+                LogTextBox.Text += "_";
+            });
+            return Task.CompletedTask;
+        }
+        private Task Approver(CancellationToken cancel)
+        {
+            LogTextBox.Dispatcher.InvokeAsync(() =>
+            {
+                LogTextBox.Text += "-";
+            });
+            return Task.CompletedTask;
+        }
+        private Task Profile5(CancellationToken cancel)
+        {
+            Task.Delay(1000, cancel).GetAwaiter().GetResult();
+            return Task.CompletedTask;
+        }
+        private Task Profile6(CancellationToken cancel)
+        {
+            Task.Delay(1000, cancel).GetAwaiter().GetResult();
+            return Task.CompletedTask;
+        }
+
     }
 }
