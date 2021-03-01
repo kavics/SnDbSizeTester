@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace SnDbSizeTesterApp
+﻿namespace SnDbSizeTesterApp.Models
 {
     public class DatabaseInfo
     {

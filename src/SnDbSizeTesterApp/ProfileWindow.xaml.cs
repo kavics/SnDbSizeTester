@@ -11,6 +11,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using SnDbSizeTesterApp.Profiles;
 
 namespace SnDbSizeTesterApp
 {
@@ -81,7 +82,7 @@ namespace SnDbSizeTesterApp
             while (true)
             {
                 if(_workingState == WorkingState.Running)
-                    await _profile.Action(CancellationToken.None);
+                    await _profile.Action(CancellationToken.None).ConfigureAwait(false);
 
                 if (!_profile.Recurring || _workingState == WorkingState.Initial)
                     break;
@@ -89,7 +90,7 @@ namespace SnDbSizeTesterApp
                 var delay = _profile.WaitMilliseconds;
                 if (delay > 0)
                 {
-                    await Task.Delay(delay);
+                    await Task.Delay(delay).ConfigureAwait(false);
                     if (!_profile.Recurring || _workingState == WorkingState.Initial)
                         break;
                 }

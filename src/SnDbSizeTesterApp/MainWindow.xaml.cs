@@ -19,6 +19,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using SenseNet.Client;
 using SenseNet.Client.Authentication;
+using SnDbSizeTesterApp.Models;
+using SnDbSizeTesterApp.Profiles;
 
 namespace SnDbSizeTesterApp
 {
@@ -44,6 +46,7 @@ namespace SnDbSizeTesterApp
             _dispatcherTimer.Tick += DispatcherTimer_Tick;
 
             PlanLabel.Content = "Plan: ?";
+            LogTextBox.Text = "";
         }
 
         private void DispatcherTimer_Tick(object sender, EventArgs e)
@@ -98,7 +101,8 @@ namespace SnDbSizeTesterApp
             {
                 // request and set the access token
                 var tokenStore = _serviceProvider.GetService<ITokenStore>();
-                server.Authentication.AccessToken = await tokenStore.GetTokenAsync(server, connPrms.ClientId, connPrms.Secret);
+                server.Authentication.AccessToken =
+                    await tokenStore.GetTokenAsync(server, connPrms.ClientId, connPrms.Secret).ConfigureAwait(false);
             }
             ClientContext.Current.AddServer(server);
 
@@ -110,7 +114,7 @@ namespace SnDbSizeTesterApp
             using (var reader = new JsonTextReader(new StringReader(dashboardDataSrc)))
                 dashboardData = JsonSerializer.Create().Deserialize<DashboardData>(reader);
 
-            var dbInfo = await GetDatabaseInfoAsync();
+            var dbInfo = await GetDatabaseInfoAsync().ConfigureAwait(false);
 
             await LogTextBox.Dispatcher.InvokeAsync(() =>
             {
@@ -152,7 +156,7 @@ namespace SnDbSizeTesterApp
 
         private async Task RefreshBarsByDatabaseInfoAsync()
         {
-            var dbInfo = await GetDatabaseInfoAsync();
+            var dbInfo = await GetDatabaseInfoAsync().ConfigureAwait(false);
             Dispatcher.InvokeAsync(() =>
             {
                 DataBar.Value = dbInfo.Database.DataPercent;
@@ -161,7 +165,7 @@ namespace SnDbSizeTesterApp
         }
         private async Task RefreshBarsByDatabaseUsageAsync()
         {
-            var dbUsage = await GetDatabaseUsageAsync();
+            var dbUsage = await GetDatabaseUsageAsync().ConfigureAwait(false);
             var contentCount = dbUsage.Content.Count;
             Dispatcher.InvokeAsync(() =>
             {
@@ -226,23 +230,19 @@ namespace SnDbSizeTesterApp
         private List<Window> _activeProfiles = new List<Window>();
         private void CreateProfile(string name)
         {
-            var profile = new Profile
-            {
-                Name = name,
-                Recurring = true,
-                WaitMilliseconds = 1250,
-            };
+            Profile profile;
             switch (name)
             {
-                case "Uploader": profile.Action = Uploader; break;
-                case "Cleaner": profile.Action = Cleaner; break;
-                case "Editor": profile.Action = Editor; break;
-                case "Approver": profile.Action = Approver; break;
-                case "Profile5": profile.Action = Profile5; break;
-                case "Profile6": profile.Action = Profile5; break;
+                case "Uploader": profile = new UploaderProfile(); break;
+                case "Cleaner": profile = new CleanerProfile(); break;
+                case "Editor": profile = new EditorProfile(); break;
+                case "Approver": profile = new ApproverProfile(); break;
+                //case "Profile5": profile = new Profile5(); break;
+                //case "Profile6": profile = new Profile6(); break;
                 default:
-                    break;
+                    throw new ArgumentException("Unknown profile type: " + name);
             }
+            profile._printAction = Print;
 
             var window = new ProfileWindow(profile);
             _activeProfiles.Add(window);
@@ -291,16 +291,13 @@ namespace SnDbSizeTesterApp
             });
             return Task.CompletedTask;
         }
-        private Task Profile5(CancellationToken cancel)
-        {
-            Task.Delay(1000, cancel).GetAwaiter().GetResult();
-            return Task.CompletedTask;
-        }
-        private Task Profile6(CancellationToken cancel)
-        {
-            Task.Delay(1000, cancel).GetAwaiter().GetResult();
-            return Task.CompletedTask;
-        }
 
+        private void Print(string text)
+        {
+            LogTextBox.Dispatcher.InvokeAsync(() =>
+            {
+                LogTextBox.Text += text;
+            });
+        }
     }
 }
