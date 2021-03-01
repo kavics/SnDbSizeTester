@@ -8,8 +8,8 @@
         Title="MainWindow" Height="600" Width="500" Closing="Window_Closing">
     <Grid>
         <Label Content="SNaaS Repository URL:" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="161" Height="25"/>
-        <!--<TextBox x:Name="ConnectionTextBox" Margin="142,10,75,0" Padding="2,4,0,0" Text="https://localhost:44362" TextWrapping="Wrap" VerticalAlignment="Top" Height="25"/>-->
-        <TextBox x:Name="ConnectionTextBox" Margin="142,10,75,0" Padding="2,4,0,0" Text="https://netcore-service.test.sensenet.com" TextWrapping="Wrap" VerticalAlignment="Top" Height="25"/>
+        <TextBox x:Name="ConnectionTextBox" Margin="142,10,75,0" Padding="2,4,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="25" Text="https://localhost:44362"/>
+        <!--<TextBox x:Name="ConnectionTextBox" Margin="142,10,75,0" Padding="2,4,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="25" Text="https://netcore-service.test.sensenet.com"/>-->
         <Button x:Name="ConnectButton" Content="Connect" Margin="0,10,10,0" VerticalAlignment="Top" Height="25" FontWeight="Bold" Click="ConnectButton_Click" HorizontalAlignment="Right" Width="60"/>
         <Label x:Name="PlanLabel" Content="Plan: ?" Margin="10,40,10,0" VerticalAlignment="Top" Height="25"/>
         <ProgressBar x:Name="DataBar" HorizontalAlignment="Left" Height="26" Margin="10,65,0,0" VerticalAlignment="Top" Width="400" Value="606279" Maximum="1048576"/>
