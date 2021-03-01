@@ -15,11 +15,10 @@ namespace SnDbSizeTesterApp.Profiles
             try
             {
                 var root = await base.GetTestFolderAsync().ConfigureAwait(false);
-                var query = $"InFolder:'{root.Path}' .AUTOFILTERS:OFF .SORT:Id .TOP:1";
+                var query = $"InFolder:'{root.Path}' .AUTOFILTERS:OFF .SORT:Id .TOP:10";
                 var result = await Content.QueryAsync(query).ConfigureAwait(false);
-                var content = result.FirstOrDefault();
-                if (content != null)
-                    await Content.DeleteAsync(content.Id, true, cancellation);
+                var ids = result.Select(x => x.Id).ToArray();
+                await Content.DeleteAsync(ids, true, cancellation);
                 Print("C");
             }
             catch (Exception e)

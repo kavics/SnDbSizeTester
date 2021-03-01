@@ -134,12 +134,16 @@ namespace SnDbSizeTesterApp
 
             DataBar.Width = 400.0;
             LogBar.Width = logLimit * 400.0 / dataLimit;
+            LogPeakBar.Width = LogBar.Width;
 
             DataBarLabel.Content = $"Data ({dataLimit / 1024.0} MB)";
             LogBarLabel.Content = $"TLog ({logLimit / 1024.0} MB)";
 
             DataBar.Maximum = 100.0;
             LogBar.Maximum = 100.0;
+            LogPeakBar.Maximum = 100.0;
+
+            LogPeakBar.Value = 0.0;
 
             ContentBar.Maximum = dashboardData.Subscription.Plan.Limitations.ContentCount;
         }
@@ -157,21 +161,27 @@ namespace SnDbSizeTesterApp
         private async Task RefreshBarsByDatabaseInfoAsync()
         {
             var dbInfo = await GetDatabaseInfoAsync().ConfigureAwait(false);
+#pragma warning disable CS4014
             Dispatcher.InvokeAsync(() =>
             {
                 DataBar.Value = dbInfo.Database.DataPercent;
                 LogBar.Value = dbInfo.Database.UsedLogPercent;
+                if (LogBar.Value > LogPeakBar.Value)
+                    LogPeakBar.Value = LogBar.Value;
             });
+#pragma warning restore CS4014
         }
         private async Task RefreshBarsByDatabaseUsageAsync()
         {
             var dbUsage = await GetDatabaseUsageAsync().ConfigureAwait(false);
             var contentCount = dbUsage.Content.Count;
+#pragma warning disable CS4014
             Dispatcher.InvokeAsync(() =>
             {
                 ContentBar.Value = contentCount;
                 ContentBarLabel.Content = $"Content: {contentCount}";
             });
+#pragma warning restore CS4014
         }
 
 
