@@ -14,7 +14,8 @@
         <Label x:Name="PlanLabel" Content="Plan: ?" Margin="10,40,10,0" VerticalAlignment="Top" Height="25"/>
         <ProgressBar x:Name="DataBar" HorizontalAlignment="Left" Height="26" Margin="10,65,0,0" VerticalAlignment="Top" Width="400" Value="606279" Maximum="1048576"/>
         <Label x:Name="DataBarLabel" Content="Data" HorizontalAlignment="Left" Margin="10,65,0,0" VerticalAlignment="Top" Width="161"/>
-        <ProgressBar x:Name="LogBar" HorizontalAlignment="Left" Height="26" Margin="10,96,0,0" VerticalAlignment="Top" Width="400" Value="606279" Maximum="1048576" Foreground="#FFCB9F0B"/>
+        <ProgressBar x:Name="LogPeakBar" HorizontalAlignment="Left" Height="26" Margin="10,96,0,0" VerticalAlignment="Top" Width="400" Value="606279" Maximum="1048576" Foreground="#FFF7C004" Background="{x:Null}"/>
+        <ProgressBar x:Name="LogBar" HorizontalAlignment="Left" Height="26" Margin="10,96,0,0" VerticalAlignment="Top" Width="400" Value="506279" Maximum="1048576" Foreground="#FFC79B07" Background="{x:Null}"/>
         <Label x:Name="LogBarLabel" Content="TLog" HorizontalAlignment="Left" Margin="10,96,0,0" VerticalAlignment="Top" Width="161"/>
         <ProgressBar x:Name="ContentBar" HorizontalAlignment="Left" Height="16" Margin="10,127,0,0" VerticalAlignment="Top" Width="150"/>
         <Label x:Name="ContentBarLabel" Content="Content" Padding="4,0,0,0" HorizontalAlignment="Left" Margin="10,127,0,0" VerticalAlignment="Top" Width="150" Height="16" FontSize="10"/>
