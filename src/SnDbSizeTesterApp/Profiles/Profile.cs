@@ -19,24 +19,16 @@ namespace SnDbSizeTesterApp.Profiles
             _printAction(text);
         }
 
-private bool _startup = true;
         protected async Task<Content> GetTestFolderAsync()
         {
             var uploadRootPath = "/Root/UploadTests";
 
             var uploadFolder = await Content.LoadAsync(uploadRootPath).ConfigureAwait(false);
-if (uploadFolder != null && _startup)
-{
-    await uploadFolder.DeleteAsync();
-    uploadFolder = null;
-    _startup = false;
-}
             if (uploadFolder == null)
             {
                 uploadFolder = Content.CreateNew("/Root", "SystemFolder", "UploadTests");
                 await uploadFolder.SaveAsync().ConfigureAwait(false);
             }
-
 
             return uploadFolder;
         }
