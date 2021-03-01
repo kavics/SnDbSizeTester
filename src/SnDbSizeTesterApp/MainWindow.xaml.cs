@@ -136,7 +136,7 @@ namespace SnDbSizeTesterApp
             LogBar.Width = logLimit * 400.0 / dataLimit;
 
             DataBarLabel.Content = $"Data ({dataLimit / 1024.0} MB)";
-            LogBarLabel.Content = $"Data ({logLimit / 1024.0} MB)";
+            LogBarLabel.Content = $"TLog ({logLimit / 1024.0} MB)";
 
             DataBar.Maximum = 100.0;
             LogBar.Maximum = 100.0;

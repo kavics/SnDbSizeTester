@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SnDbSizeTesterApp"
         mc:Ignorable="d"
-        Title="ProfileName" Height="144" Width="210" WindowStyle="ToolWindow" ShowInTaskbar="False" Closing="Window_Closing">
+        Title="ProfileName" Height="144" Width="210" WindowStyle="ToolWindow" ShowInTaskbar="True" Closing="Window_Closing">
     <Grid>
         <Button x:Name="ControlButton" Content="Start" Margin="0,0,70,10" Height="20" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="55" Click="ControlButton_Click"/>
         <CheckBox Content="Recurring" IsChecked="{Binding Path=Recurring, Mode=TwoWay}" Margin="16,10,0,0" HorizontalAlignment="Left" Width="71" Click="CheckBox_Click" Height="15" VerticalAlignment="Top"/>
