@@ -16,7 +16,8 @@ namespace SnDbSizeTesterApp.Profiles
             {
                 var root = await base.GetTestFolderAsync().ConfigureAwait(false);
                 var query = $"InFolder:'{root.Path}' .AUTOFILTERS:OFF .SORT:Id .TOP:10";
-                var result = await Content.QueryAsync(query).ConfigureAwait(false);
+                var select = new[] {"Id", "ParentId", "Path", "Name"};
+                var result = await Content.QueryAsync(query, select).ConfigureAwait(false);
                 var ids = result.Select(x => x.Id).ToArray();
                 await Content.DeleteAsync(ids, true, cancellation);
                 Print("C");

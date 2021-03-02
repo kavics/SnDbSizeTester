@@ -10,7 +10,7 @@ namespace SnDbSizeTesterApp.Profiles
     {
         public override string Name => "Uploader";
 
-        private readonly int size = 1 * 512 * 1024;
+        private readonly int size = 1 * 1000 * 1024;
         public override async Task Action(CancellationToken cancellation)
         {
             try
