@@ -171,8 +171,13 @@ namespace SnDbSizeTesterApp
             });
 #pragma warning restore CS4014
         }
+
+        private int _refreshBarsByDatabaseUsageCallCounter;
         private async Task RefreshBarsByDatabaseUsageAsync()
         {
+            if (++_refreshBarsByDatabaseUsageCallCounter % 3 != 1)
+                return;
+
             var dbUsage = await GetDatabaseUsageAsync().ConfigureAwait(false);
             var contentCount = dbUsage.Content.Count;
 #pragma warning disable CS4014

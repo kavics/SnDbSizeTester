@@ -24,7 +24,7 @@ namespace SnDbSizeTesterApp.Profiles
             }
             catch (Exception e)
             {
-                Print(e.ToString());
+                Print(e);
             }
 
         }
