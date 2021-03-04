@@ -3,9 +3,13 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:oxy="clr-namespace:OxyPlot.Wpf;assembly=OxyPlot.Wpf" 
         xmlns:local="clr-namespace:SnDbSizeTesterApp"
         mc:Ignorable="d"
-        Title="MainWindow" Height="600" Width="500" Closing="Window_Closing">
+        Title="MainWindow" Height="906" Width="500" Closing="Window_Closing">
+    <Window.DataContext>
+        <local:MainViewModel />
+    </Window.DataContext>
     <Grid>
         <Label Content="SNaaS Repository URL:" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="161" Height="25"/>
         <!--<TextBox x:Name="ConnectionTextBox" Margin="142,10,75,0" Padding="2,4,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="25" Text="https://localhost:44362"/>-->
@@ -32,7 +36,10 @@
         </StackPanel>
         <Button x:Name="CloseAllProfilesButton" Content="Kill All" HorizontalAlignment="Left" Margin="10,223,0,0" VerticalAlignment="Top" Width="54" Click="CloseAllProfilesButton_Click"/>
 
-        <TextBox x:Name="LogTextBox" Margin="10,268,10,10" Text="LogTextBox" TextWrapping="Wrap" HorizontalScrollBarVisibility="Visible"
+        <oxy:PlotView Model="{Binding Model}" Margin="10,248,10,310" />
+
+        <TextBox x:Name="LogTextBox" Margin="10,585,10,10" Text="LogTextBox" TextWrapping="Wrap" HorizontalScrollBarVisibility="Visible"
                  VerticalScrollBarVisibility="Visible"/>
+        <Button x:Name="DbTestButton" Content="Nagyon fontos button" HorizontalAlignment="Left" Margin="330,223,0,0" VerticalAlignment="Top" Width="150" Height="25" Click="DbTestButton_Click"/>
     </Grid>
 </Window>

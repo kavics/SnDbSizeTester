@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -17,6 +18,8 @@ using System.Windows.Shapes;
 using System.Windows.Threading;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
+using OxyPlot;
+using OxyPlot.Series;
 using SenseNet.Client;
 using SenseNet.Client.Authentication;
 using SnDbSizeTesterApp.Models;
@@ -35,6 +38,9 @@ namespace SnDbSizeTesterApp
             set => _serviceProvider = value;
         }
 
+        private MainViewModel _chartViewModel;
+
+        private string _connectionString;
 
         private DispatcherTimer _dispatcherTimer;
         public MainWindow()
@@ -47,6 +53,9 @@ namespace SnDbSizeTesterApp
 
             PlanLabel.Content = "Plan: ?";
             LogTextBox.Text = "";
+
+            _chartViewModel =  new MainViewModel();
+            this.DataContext = _chartViewModel;
         }
 
         private void DispatcherTimer_Tick(object sender, EventArgs e)
@@ -89,6 +98,7 @@ namespace SnDbSizeTesterApp
                 return;
             }
 
+            _connectionString = connPrms.ConnectionString;
 
             var server = new ServerContext {Url = url};
 
@@ -161,6 +171,10 @@ namespace SnDbSizeTesterApp
         private async Task RefreshBarsByDatabaseInfoAsync()
         {
             var dbInfo = await GetDatabaseInfoAsync().ConfigureAwait(false);
+
+            _chartViewModel.Advance(new[]
+                {dbInfo.Database.DataPercent, dbInfo.Database.UsedLogPercent, GetTempDbAllocatedPercent()});
+
 #pragma warning disable CS4014
             Dispatcher.InvokeAsync(() =>
             {
@@ -313,6 +327,26 @@ namespace SnDbSizeTesterApp
             {
                 LogTextBox.Text += text;
             });
+        }
+
+        private void DbTestButton_Click(object sender, RoutedEventArgs e)
+        {
+            Print($"TempDb allocated: {GetTempDbAllocatedPercent()}%");
+        }
+        private double GetTempDbAllocatedPercent()
+        {
+            using (var cn = new SqlConnection(@"Data Source=sn-dev-k8s-01,31114;Initial Catalog=tempdb;User ID=sa;Password=QWEasd123%"))
+            {
+                cn.Open();
+                using (var cmd = new SqlCommand(@"SELECT CONVERT(real, 
+FORMAT(allocated_extent_page_count * 100.0 / (unallocated_extent_page_count + allocated_extent_page_count), 'N2')) [Temp_P]
+    FROM tempdb.sys.dm_db_file_space_usage;", cn))
+                {
+                    return Convert.ToDouble(cmd.ExecuteScalar());
+                }
+            }
+
+            
         }
     }
 }
