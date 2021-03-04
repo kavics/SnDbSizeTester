@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using SenseNet.Client;
@@ -13,12 +14,6 @@ namespace SnDbSizeTesterApp.Profiles
         public abstract string Name { get; }
         public abstract Task Action(CancellationToken cancellation);
 
-        internal Action<string> _printAction { get; set; }
-        protected void Print(string text)
-        {
-            _printAction(text);
-        }
-
         protected async Task<Content> GetTestFolderAsync()
         {
             var uploadRootPath = "/Root/Content/UploadTests";
@@ -31,6 +26,24 @@ namespace SnDbSizeTesterApp.Profiles
             }
 
             return uploadFolder;
+        }
+
+        internal Action<string> _printAction { get; set; }
+        protected void Print(string text)
+        {
+            _printAction(text);
+        }
+        protected void Print(Exception e)
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine(e.ToString());
+            while ((e = e.InnerException) != null)
+            {
+                sb.AppendLine("-------------- InnerException:");
+                sb.AppendLine(e.ToString());
+            }
+            sb.AppendLine("==============================");
+            Print(sb.ToString());
         }
     }
 }
