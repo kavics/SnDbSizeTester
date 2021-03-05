@@ -19,8 +19,12 @@ namespace SnDbSizeTesterApp.Profiles
                 var select = new[] {"Id", "ParentId", "Path", "Name"};
                 var result = await Content.QueryAsync(query, select).ConfigureAwait(false);
                 var ids = result.Select(x => x.Id).ToArray();
+                var idstr = string.Join(", ", ids.Select(x => x.ToString()));
+                var start = DateTime.Now;
+                Log($"> Cleaning: {idstr}");
                 await Content.DeleteAsync(ids, true, cancellation);
-                Print("C");
+                var duration = DateTime.Now - start;
+                Log($"| Cleaned: {idstr} ({duration.TotalSeconds} sec)");
             }
             catch (Exception e)
             {

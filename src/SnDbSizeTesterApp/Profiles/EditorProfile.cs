@@ -8,7 +8,7 @@ namespace SnDbSizeTesterApp.Profiles
         public override string Name => "Editor";
         public override Task Action(CancellationToken cancellation)
         {
-            Print("E");
+            Log("E");
             return Task.CompletedTask;
         }
     }

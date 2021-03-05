@@ -28,10 +28,10 @@ namespace SnDbSizeTesterApp.Profiles
             return uploadFolder;
         }
 
-        internal Action<string> _printAction { get; set; }
-        protected void Print(string text)
+        internal Action<string> _logAction { get; set; }
+        protected void Log(string text)
         {
-            _printAction(text);
+            _logAction(text);
         }
         protected void Print(Exception e)
         {
@@ -43,7 +43,8 @@ namespace SnDbSizeTesterApp.Profiles
                 sb.AppendLine(e.ToString());
             }
             sb.AppendLine("==============================");
-            Print(sb.ToString());
+            Log(sb.ToString());
         }
+
     }
 }
