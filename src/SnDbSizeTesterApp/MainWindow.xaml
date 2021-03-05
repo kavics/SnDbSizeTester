@@ -38,8 +38,9 @@
 
         <oxy:PlotView Model="{Binding Model}" Margin="10,248,10,310" />
 
-        <TextBox x:Name="LogTextBox" Margin="10,585,10,10" Text="LogTextBox" TextWrapping="Wrap" HorizontalScrollBarVisibility="Visible"
+        <TextBox x:Name="LogTextBox" Margin="10,610,10,10" Text="LogTextBox" TextWrapping="NoWrap" HorizontalScrollBarVisibility="Visible"
                  VerticalScrollBarVisibility="Visible"/>
-        <Button x:Name="DbTestButton" Content="Nagyon fontos button" HorizontalAlignment="Left" Margin="330,223,0,0" VerticalAlignment="Top" Width="150" Height="25" Click="DbTestButton_Click"/>
+        <Button x:Name="DbTestButton" Content="Test DB connection" HorizontalAlignment="Left" Margin="330,223,0,0" VerticalAlignment="Top" Width="150" Height="25" Click="DbTestButton_Click"/>
+        <Button x:Name="ClearLogButton" Content="Clear" Margin="0,590,10,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="31" Click="ClearLogButton_Click"/>
     </Grid>
 </Window>

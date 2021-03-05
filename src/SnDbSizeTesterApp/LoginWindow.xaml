@@ -13,7 +13,7 @@
         <Label Content="Secret:" HorizontalAlignment="Left" Margin="10,98,0,0" VerticalAlignment="Top"/>
         <TextBox x:Name="SecretTextBox" Text="{Binding Path=Secret, Mode=TwoWay, FallbackValue=SecretTextBox}" Margin="10,124,10,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="26" FontSize="14" FontWeight="Bold" VerticalContentAlignment="Center"/>
         <Label Content="ConnectionString:" HorizontalAlignment="Left" Margin="10,155,0,0" VerticalAlignment="Top"/>
-        <TextBox x:Name="ConnectionStringTextBox" Text="{Binding Path=ConnectionString, Mode=TwoWay, FallbackValue=ConnectionStringTextBox}" Margin="10,181,10,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="26" FontSize="14" FontWeight="Bold" VerticalContentAlignment="Center"/>
+        <TextBox x:Name="ConnectionStringTextBox" Text="{Binding Path=ConnectionString, Mode=TwoWay, FallbackValue=ConnectionStringTextBox}" Margin="10,181,10,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="26" FontSize="12" FontWeight="Bold" VerticalContentAlignment="Center"/>
         <Button IsDefault="True" x:Name="ConnectButton" Content="Connect" Margin="0,0,10,14" FontSize="14" FontWeight="Bold" HorizontalAlignment="Right" Width="70" Height="28" VerticalAlignment="Bottom" Click="ConnectButton_Click"/>
         <Button IsCancel="True" x:Name="CancelButton" Content="Cancel" Margin="0,0,99,14" FontSize="14" HorizontalAlignment="Right" Width="70" Height="28" VerticalAlignment="Bottom"/>
 

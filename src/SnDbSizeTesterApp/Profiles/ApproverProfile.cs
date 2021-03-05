@@ -8,7 +8,7 @@ namespace SnDbSizeTesterApp.Profiles
         public override string Name => "Approver";
         public override Task Action(CancellationToken cancellation)
         {
-            Print("A");
+            Log("A");
             return Task.CompletedTask;
         }
     }

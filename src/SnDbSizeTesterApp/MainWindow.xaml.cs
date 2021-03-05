@@ -271,7 +271,7 @@ namespace SnDbSizeTesterApp
                 default:
                     throw new ArgumentException("Unknown profile type: " + name);
             }
-            profile._printAction = Print;
+            profile._logAction = Log;
 
             var window = new ProfileWindow(profile);
             _activeProfiles.Add(window);
@@ -321,32 +321,54 @@ namespace SnDbSizeTesterApp
             return Task.CompletedTask;
         }
 
+        private void Log(string msg)
+        {
+            Print($"{ DateTime.Now:yyyy-MM-dd HH:mm:ss.ffff}\t{msg}\r\n");
+        }
         private void Print(string text)
         {
             LogTextBox.Dispatcher.InvokeAsync(() =>
             {
                 LogTextBox.Text += text;
+                LogTextBox.ScrollToEnd();
             });
         }
 
         private void DbTestButton_Click(object sender, RoutedEventArgs e)
         {
-            Print($"TempDb allocated: {GetTempDbAllocatedPercent()}%");
+            Print($"TempDb Size: {GetTempDbSizeInMB()}\r\n");
+            Print($"TempDb allocated: {GetTempDbAllocatedPercent()}%\r\n");
         }
         private double GetTempDbAllocatedPercent()
         {
-            using (var cn = new SqlConnection(@"Data Source=sn-dev-k8s-01,31114;Initial Catalog=tempdb;User ID=sa;Password=QWEasd123%"))
+            using (var cn = new SqlConnection(_connectionString))
             {
                 cn.Open();
                 using (var cmd = new SqlCommand(@"SELECT CONVERT(real, 
-FORMAT(allocated_extent_page_count * 100.0 / (unallocated_extent_page_count + allocated_extent_page_count), 'N2')) [Temp_P]
-    FROM tempdb.sys.dm_db_file_space_usage;", cn))
+FORMAT(SUM(allocated_extent_page_count) * 100.0 / (SUM(unallocated_extent_page_count) + SUM(allocated_extent_page_count)), 'N2')) [Temp_P]
+	FROM tempdb.sys.dm_db_file_space_usage;
+", cn))
                 {
                     return Convert.ToDouble(cmd.ExecuteScalar());
                 }
             }
+        }
+        private double GetTempDbSizeInMB()
+        {
+            using (var cn = new SqlConnection(_connectionString))
+            {
+                cn.Open();
+                using (var cmd = new SqlCommand(
+                    @"SELECT SUM(size)/128 AS [Total database size (MB)] FROM tempdb.sys.database_files", cn))
+                {
+                    return Convert.ToDouble(cmd.ExecuteScalar());
+                }
+            }
+        }
 
-            
+        private void ClearLogButton_Click(object sender, RoutedEventArgs e)
+        {
+            LogTextBox.Clear();
         }
     }
 }
