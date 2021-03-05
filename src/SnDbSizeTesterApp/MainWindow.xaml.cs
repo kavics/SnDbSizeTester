@@ -68,7 +68,7 @@ namespace SnDbSizeTesterApp
         private void ConnectButton_Click(object sender, RoutedEventArgs e)
         {
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
-            ConnectToRepositoryAsync(ConnectionTextBox.Text);
+            ConnectToRepositoryAsync(UrlComboBox.Text);
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
         }
 
@@ -369,6 +369,22 @@ FORMAT(SUM(allocated_extent_page_count) * 100.0 / (SUM(unallocated_extent_page_c
         private void ClearLogButton_Click(object sender, RoutedEventArgs e)
         {
             LogTextBox.Clear();
+        }
+
+        private void DbActionButton_Click(object sender, RoutedEventArgs e)
+        {
+            Log("Emergency action is running...");
+            using (var cn = new SqlConnection(_connectionString))
+            {
+                cn.Open();
+                using (var cmd = new SqlCommand(
+                    @"USE tempdb
+DBCC SHRINKFILE (N'tempdev', 0, TRUNCATEONLY)", cn))
+                {
+                    cmd.ExecuteNonQuery();
+                }
+            }
+            Log("Emergency action finished.");
         }
     }
 }
