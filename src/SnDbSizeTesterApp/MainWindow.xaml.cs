@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -24,6 +25,7 @@ using SenseNet.Client;
 using SenseNet.Client.Authentication;
 using SnDbSizeTesterApp.Models;
 using SnDbSizeTesterApp.Profiles;
+using Path = System.IO.Path;
 
 namespace SnDbSizeTesterApp
 {
@@ -52,16 +54,22 @@ namespace SnDbSizeTesterApp
             _dispatcherTimer.Tick += DispatcherTimer_Tick;
 
             PlanLabel.Content = "Plan: ?";
+            TempDbInfoTextBox.Text = "";
             LogTextBox.Text = "";
 
             _chartViewModel =  new MainViewModel();
             this.DataContext = _chartViewModel;
+
+            InitializeChartDataFile();
         }
 
+        private int _dispatcherTimerTickCount = 0;
         private void DispatcherTimer_Tick(object sender, EventArgs e)
         {
 #pragma warning disable CS4014
             RefreshBarsAsync();
+            if((++_dispatcherTimerTickCount % 3) == 0)
+                PreventDatabaseSizeOverflowAsync();
 #pragma warning restore CS4014
         }
 
@@ -172,18 +180,43 @@ namespace SnDbSizeTesterApp
         {
             var dbInfo = await GetDatabaseInfoAsync().ConfigureAwait(false);
 
+            var dataPercent = dbInfo.Database.DataPercent;
+            var logPercent = dbInfo.Database.UsedLogPercent;
+            var tempPercent = await GetTempDbAllocatedPercentAsync().ConfigureAwait(false);
             _chartViewModel.Advance(new[]
-                {dbInfo.Database.DataPercent, dbInfo.Database.UsedLogPercent, GetTempDbAllocatedPercent()});
+                {dataPercent, logPercent, tempPercent});
 
 #pragma warning disable CS4014
+            WriteChartDataToFile(dataPercent, logPercent, tempPercent);
+
             Dispatcher.InvokeAsync(() =>
             {
-                DataBar.Value = dbInfo.Database.DataPercent;
-                LogBar.Value = dbInfo.Database.UsedLogPercent;
+                DataBar.Value = dataPercent;
+                LogBar.Value = logPercent;
                 if (LogBar.Value > LogPeakBar.Value)
                     LogPeakBar.Value = LogBar.Value;
             });
 #pragma warning restore CS4014
+        }
+
+        private string _chartDataFilePath;
+        private void InitializeChartDataFile()
+        {
+            var asm = Assembly.GetExecutingAssembly();
+            var asmPath = asm.Location;
+            var dir = Path.Combine(Path.GetDirectoryName(asmPath), "ChartData");
+            if (!Directory.Exists(dir))
+                Directory.CreateDirectory(dir);
+            _chartDataFilePath = Path.Combine(dir, "current-chart.txt");
+            //if (File.Exists(_chartDataFilePath))
+            //    File.Delete(_chartDataFilePath);
+            using (var writer = new StreamWriter(_chartDataFilePath, false))
+                writer.WriteLine("Data\tLog\tTemp");
+        }
+        private async Task WriteChartDataToFile(float dataPercent, float logPercent, double tempPercent)
+        {
+            using (var writer = new StreamWriter(_chartDataFilePath, true))
+                writer.WriteLine($"{dataPercent}\t{logPercent}\t{tempPercent}");
         }
 
         private int _refreshBarsByDatabaseUsageCallCounter;
@@ -336,34 +369,16 @@ namespace SnDbSizeTesterApp
 
         private void DbTestButton_Click(object sender, RoutedEventArgs e)
         {
-            Print($"TempDb Size: {GetTempDbSizeInMB()}\r\n");
-            Print($"TempDb allocated: {GetTempDbAllocatedPercent()}%\r\n");
+#pragma warning disable 4014
+            DbTestAsync();
+#pragma warning restore 4014
         }
-        private double GetTempDbAllocatedPercent()
+
+        private async Task DbTestAsync()
         {
-            using (var cn = new SqlConnection(_connectionString))
-            {
-                cn.Open();
-                using (var cmd = new SqlCommand(@"SELECT CONVERT(real, 
-FORMAT(SUM(allocated_extent_page_count) * 100.0 / (SUM(unallocated_extent_page_count) + SUM(allocated_extent_page_count)), 'N2')) [Temp_P]
-	FROM tempdb.sys.dm_db_file_space_usage;
-", cn))
-                {
-                    return Convert.ToDouble(cmd.ExecuteScalar());
-                }
-            }
-        }
-        private double GetTempDbSizeInMB()
-        {
-            using (var cn = new SqlConnection(_connectionString))
-            {
-                cn.Open();
-                using (var cmd = new SqlCommand(
-                    @"SELECT SUM(size)/128 AS [Total database size (MB)] FROM tempdb.sys.database_files", cn))
-                {
-                    return Convert.ToDouble(cmd.ExecuteScalar());
-                }
-            }
+            var size = await GetTempDbSizeInMbAsync().ConfigureAwait(false);
+            var percent = await GetTempDbAllocatedPercentAsync().ConfigureAwait(false);
+            Print($"---- TempDb Size: {size},  allocated: {percent}%\r\n");
         }
 
         private void ClearLogButton_Click(object sender, RoutedEventArgs e)
@@ -373,18 +388,87 @@ FORMAT(SUM(allocated_extent_page_count) * 100.0 / (SUM(unallocated_extent_page_c
 
         private void DbActionButton_Click(object sender, RoutedEventArgs e)
         {
-            Log("Emergency action is running...");
+#pragma warning disable 4014
+            EmergencyActionAsync();
+#pragma warning restore 4014
+        }
+
+        private double _tempDbSizePeak = 0.0d;
+        private async Task PreventDatabaseSizeOverflowAsync()
+        {
+            Log("---- Checking DB size...");
+            var size = await GetTempDbSizeInMbAsync();
+            var percent = await GetTempDbAllocatedPercentAsync();
+            ViewTempDbInfo(size, percent);
+            Print($"---- TempDb Size: {size},  allocated: {percent}%\r\n");
+            if (size < 30000.0d || percent < 50.0d)
+                return;
+
+            await EmergencyActionAsync().ConfigureAwait(false);
+            size = await GetTempDbSizeInMbAsync().ConfigureAwait(false);
+            percent = await GetTempDbAllocatedPercentAsync().ConfigureAwait(false);
+            ViewTempDbInfo(size, percent);
+            Print($"---- TempDb Size: {size},  allocated: {percent}%\r\n");
+        }
+
+        private void ViewTempDbInfo(double size, double percent)
+        {
+            if (size > _tempDbSizePeak)
+                _tempDbSizePeak = size;
+
+            Dispatcher.InvokeAsync(() =>
+            {
+                TempDbInfoTextBox.Text = $"size: {size:F3} MB, fill: {percent:F1}%, peak: {_tempDbSizePeak:F3}";
+            });
+        }
+
+        private async Task<double> GetTempDbAllocatedPercentAsync()
+        {
+            using (var cn = new SqlConnection(_connectionString))
+            {
+                cn.Open();
+                using (var cmd = new SqlCommand(@"SELECT CONVERT(real, 
+FORMAT(SUM(allocated_extent_page_count) * 100.0 / (SUM(unallocated_extent_page_count) + SUM(allocated_extent_page_count)), 'N2')) [Temp_P]
+	FROM tempdb.sys.dm_db_file_space_usage;
+", cn))
+                {
+                    return Convert.ToDouble(await cmd.ExecuteScalarAsync());
+                }
+            }
+        }
+        private async Task<double> GetTempDbSizeInMbAsync()
+        {
+            using (var cn = new SqlConnection(_connectionString))
+            {
+                cn.Open();
+                using (var cmd = new SqlCommand(
+                    @"SELECT SUM(size)/128 AS [Total database size (MB)] FROM tempdb.sys.database_files", cn))
+                {
+                    return Convert.ToDouble(await cmd.ExecuteScalarAsync());
+                }
+            }
+        }
+        private async Task EmergencyActionAsync()
+        {
+            Log("---- Emergency action is running...");
             using (var cn = new SqlConnection(_connectionString))
             {
                 cn.Open();
                 using (var cmd = new SqlCommand(
                     @"USE tempdb
-DBCC SHRINKFILE (N'tempdev', 0, TRUNCATEONLY)", cn))
+CHECKPOINT;
+DBCC FREEPROCCACHE -- clean cache
+DBCC DROPCLEANBUFFERS -- clean buffers
+DBCC FREESYSTEMCACHE ('ALL') -- clean system cache
+DBCC FREESESSIONCACHE -- clean session cache
+DBCC SHRINKFILE ('tempdev') -- shrink db file
+DBCC SHRINKFILE ('templog') -- shrink log file
+", cn))
                 {
-                    cmd.ExecuteNonQuery();
+                    await cmd.ExecuteNonQueryAsync().ConfigureAwait(false);
                 }
             }
-            Log("Emergency action finished.");
+            Log("---- Emergency action finished.");
         }
     }
 }

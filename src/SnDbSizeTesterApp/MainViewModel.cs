@@ -52,8 +52,17 @@ namespace SnDbSizeTesterApp
             tmp.Series.Add(_series[2]);
 
             // Axes are created automatically if they are not defined
-            tmp.Axes.Add(new LinearAxis { Position = AxisPosition.Bottom, Minimum = 0, Maximum = 100 });
-            tmp.Axes.Add(new LinearAxis { Position = AxisPosition.Left, Minimum = 0, Maximum = 100 });
+            tmp.Axes.Add(new LinearAxis
+            {
+                Position = AxisPosition.Bottom, Minimum = 0, Maximum = 100,
+                /*MajorGridlineStyle = LineStyle.Dot, MajorGridlineColor = OxyColor.FromRgb(0x80, 0x80, 0x80*/
+            });
+            tmp.Axes.Add(new LinearAxis { Position = AxisPosition.Left, Minimum = 0, Maximum = 100,
+                MajorGridlineStyle = LineStyle.Dash,
+                MajorGridlineColor = OxyColor.FromRgb(0xC0, 0xC0, 0xC0),
+                MinorGridlineStyle = LineStyle.Dot,
+                MinorGridlineColor = OxyColor.FromRgb(0xC0, 0xC0, 0xC0)
+            });
 
             // Set the Model property, the INotifyPropertyChanged event will make the WPF Plot control update its content
             this.Model = tmp;

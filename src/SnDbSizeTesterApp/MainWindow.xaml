@@ -28,9 +28,10 @@
         <Label x:Name="LogBarLabel" Content="TLog" HorizontalAlignment="Left" Margin="10,96,0,0" VerticalAlignment="Top" Width="161"/>
         <ProgressBar x:Name="ContentBar" HorizontalAlignment="Left" Height="16" Margin="10,127,0,0" VerticalAlignment="Top" Width="150"/>
         <Label x:Name="ContentBarLabel" Content="Content" Padding="4,0,0,0" HorizontalAlignment="Left" Margin="10,127,0,0" VerticalAlignment="Top" Width="150" Height="16" FontSize="10"/>
+        <TextBox x:Name="TempDbInfoTextBox" HorizontalAlignment="Left" Margin="67,148,0,0" Text="TempDbInfoTextBox" TextWrapping="Wrap" VerticalAlignment="Top" Width="343"/>
 
-        <Label Content="Profiles" HorizontalAlignment="Left" Margin="10,159,0,0" VerticalAlignment="Top" Width="74"/>
-        <StackPanel Height="40" VerticalAlignment="Top" Margin="0,178,0,0" Orientation="Horizontal">
+        <Label Content="Profiles" HorizontalAlignment="Left" Margin="11,175,0,0" VerticalAlignment="Top" Width="74"/>
+        <StackPanel Height="40" VerticalAlignment="Top" Margin="0,201,0,0" Orientation="Horizontal">
             <Button Content="Uploader" Margin="10,4,0,4" Width="70" Click="ProfileButton_Click"/>
             <Button Content="Cleaner"  Margin="10,4,0,4" Width="70" Click="ProfileButton_Click"/>
             <Button Content="Editor"   Margin="10,4,0,4" Width="70" Click="ProfileButton_Click" IsEnabled="False"/>
@@ -38,14 +39,15 @@
             <Button Content="Profile5" Margin="10,4,0,4" Width="70" Click="ProfileButton_Click" IsEnabled="False"/>
             <Button Content="Profile6" Margin="10,4,0,4" Width="70" Click="ProfileButton_Click" IsEnabled="False"/>
         </StackPanel>
-        <Button x:Name="CloseAllProfilesButton" Content="Kill All" HorizontalAlignment="Left" Margin="10,223,0,0" VerticalAlignment="Top" Width="54" Click="CloseAllProfilesButton_Click"/>
+        <Button x:Name="CloseAllProfilesButton" Content="Kill All" HorizontalAlignment="Left" Margin="11,241,0,0" VerticalAlignment="Top" Width="54" Click="CloseAllProfilesButton_Click"/>
 
-        <oxy:PlotView Model="{Binding Model}" Margin="10,248,10,310" />
+        <oxy:PlotView Model="{Binding Model}" Margin="10,279,10,0" Height="332" VerticalAlignment="Top" />
 
-        <TextBox x:Name="LogTextBox" Margin="10,610,10,10" Text="LogTextBox" TextWrapping="NoWrap" HorizontalScrollBarVisibility="Visible"
+        <TextBox x:Name="LogTextBox" Margin="10,636,10,10" Text="LogTextBox" TextWrapping="NoWrap" HorizontalScrollBarVisibility="Visible"
                  VerticalScrollBarVisibility="Visible"/>
-        <Button x:Name="DbActionButton" Content="EMERGENCY BUTTON" HorizontalAlignment="Left" Margin="231,223,0,0" VerticalAlignment="Top" Height="25" Width="131" Click="DbActionButton_Click"/>
-        <Button x:Name="DbTestButton" Content="Test DB connection" HorizontalAlignment="Left" Margin="367,223,0,0" VerticalAlignment="Top" Width="113" Height="25" Click="DbTestButton_Click"/>
-        <Button x:Name="ClearLogButton" Content="Clear" Margin="0,590,10,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="31" Click="ClearLogButton_Click"/>
+        <Button x:Name="DbActionButton" Content="EMERGENCY BUTTON" HorizontalAlignment="Left" Margin="233,243,0,0" VerticalAlignment="Top" Height="25" Width="131" Click="DbActionButton_Click"/>
+        <Button x:Name="DbTestButton" Content="Test DB connection" HorizontalAlignment="Left" Margin="369,243,0,0" VerticalAlignment="Top" Width="113" Height="25" Click="DbTestButton_Click"/>
+        <Button x:Name="ClearLogButton" Content="Clear" Margin="0,616,10,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="31" Click="ClearLogButton_Click"/>
+        <Label Content="TempDb:" HorizontalAlignment="Left" Margin="10,144,0,0" VerticalAlignment="Top"/>
     </Grid>
 </Window>
