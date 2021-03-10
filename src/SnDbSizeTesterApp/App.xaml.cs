@@ -13,6 +13,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using SenseNet.Client;
 using SenseNet.Client.Authentication;
+using SenseNet.Diagnostics;
 using SenseNet.Extensions.DependencyInjection;
 
 namespace SnDbSizeTesterApp
@@ -34,6 +35,10 @@ namespace SnDbSizeTesterApp
             services.AddSenseNetClientTokenStore();
             services.AddLogging(logging => logging.AddDebug());
             services.AddSingleton<MainWindow>();
+
+            SnTrace.SnTracers.Clear();
+            SnTrace.SnTracers.Add(new SnFileSystemTracer());
+            SnTrace.Custom.Enabled = true;
         }
         private void OnStartup(object sender, StartupEventArgs e)
         {

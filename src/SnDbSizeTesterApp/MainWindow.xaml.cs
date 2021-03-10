@@ -23,6 +23,7 @@ using OxyPlot;
 using OxyPlot.Series;
 using SenseNet.Client;
 using SenseNet.Client.Authentication;
+using SenseNet.Diagnostics;
 using SnDbSizeTesterApp.Models;
 using SnDbSizeTesterApp.Profiles;
 using Path = System.IO.Path;
@@ -79,13 +80,12 @@ namespace SnDbSizeTesterApp
             ConnectToRepositoryAsync(UrlComboBox.Text);
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
         }
-
         private async Task ConnectToRepositoryAsync(string url)
         {
             await LogTextBox.Dispatcher.InvokeAsync(() =>
             {
                 LogTextBox.Clear();
-                UIPrint("Connecting...");
+                Log("Connecting...");
                 ConnectButton.IsEnabled = false;
                 _dispatcherTimer.Stop();
             });
@@ -94,6 +94,7 @@ namespace SnDbSizeTesterApp
 
             var connPrms = new ConnectionParameters {Url = url, ClientId = "", Secret = ""};
             var window = new LoginWindow(connPrms);
+            window.Owner = this;
             var result = window.ShowDialog();
             if (!result.HasValue || !result.Value)
             {
@@ -138,14 +139,13 @@ namespace SnDbSizeTesterApp
             {
                 UIPrint("Ok.");
                 PlanLabel.Content = dashboardData.Subscription.Plan.Name;
-                UIResizeBars(dbInfo, dashboardData);
+                UiResizeBars(dbInfo, dashboardData);
                 ConnectButton.IsEnabled = true;
                 _dispatcherTimer.Start();
             });
 
         }
-
-        private void UIResizeBars(DatabaseInfo dbInfo, DashboardData dashboardData)
+        private void UiResizeBars(DatabaseInfo dbInfo, DashboardData dashboardData)
         {
             var dataLimit = dbInfo.Database.DataSize;
             var logLimit = dbInfo.Database.LogSize;
@@ -216,7 +216,7 @@ namespace SnDbSizeTesterApp
         private async Task WriteChartDataToFile(float dataPercent, float logPercent, double tempPercent)
         {
             using (var writer = new StreamWriter(_chartDataFilePath, true))
-                writer.WriteLine($"{dataPercent}\t{logPercent}\t{tempPercent}");
+                await writer.WriteLineAsync($"{dataPercent}\t{logPercent}\t{tempPercent}");
         }
 
         private int _refreshBarsByDatabaseUsageCallCounter;
@@ -266,6 +266,7 @@ namespace SnDbSizeTesterApp
 
         private void UIPrint(string line)
         {
+            Log(line);
             LogTextBox.Text += line + Environment.NewLine;
         }
 
@@ -305,10 +306,12 @@ namespace SnDbSizeTesterApp
                     throw new ArgumentException("Unknown profile type: " + name);
             }
             profile._logAction = Log;
+            profile._logErrorAction = LogError;
 
             var window = new ProfileWindow(profile);
             _activeProfiles.Add(window);
             window.Closed += ProfileWindow_Closed;
+            window.Owner = this;
             window.Show();
         }
         private void ForgetProfile(Window window)
@@ -321,50 +324,30 @@ namespace SnDbSizeTesterApp
                 window.Close();
         }
 
-        private Task Uploader(CancellationToken cancel)
-        {
-            LogTextBox.Dispatcher.InvokeAsync(() =>
-            {
-                LogTextBox.Text += "/";
-            });
-            return Task.CompletedTask;
-        }
-        private Task Cleaner(CancellationToken cancel)
-        {
-            LogTextBox.Dispatcher.InvokeAsync(() =>
-            {
-                LogTextBox.Text += "\\";
-            });
-            return Task.CompletedTask;
-        }
-        private Task Editor(CancellationToken cancel)
-        {
-            LogTextBox.Dispatcher.InvokeAsync(() =>
-            {
-                LogTextBox.Text += "_";
-            });
-            return Task.CompletedTask;
-        }
-        private Task Approver(CancellationToken cancel)
-        {
-            LogTextBox.Dispatcher.InvokeAsync(() =>
-            {
-                LogTextBox.Text += "-";
-            });
-            return Task.CompletedTask;
-        }
-
         private void Log(string msg)
         {
-            Print($"{ DateTime.Now:yyyy-MM-dd HH:mm:ss.ffff}\t{msg}\r\n");
+            Print(false, true, msg);
         }
-        private void Print(string text)
+        private void LogError(Exception e)
         {
-            LogTextBox.Dispatcher.InvokeAsync(() =>
+            SnTrace.WriteError(e.ToString());
+            Print(true, false, e.Message);
+        }
+        private void LogToDisplay(string msg)
+        {
+            Print(true, true, msg);
+        }
+        private void Print(bool toDisplay, bool toTrace, string text)
+        {
+            SnTrace.Write(text);
+            if(toDisplay)
             {
-                LogTextBox.Text += text;
-                LogTextBox.ScrollToEnd();
-            });
+                LogTextBox.Dispatcher.InvokeAsync(() =>
+                {
+                    LogTextBox.Text += text + "\r\n";
+                    LogTextBox.ScrollToEnd();
+                });
+            }
         }
 
         private void DbTestButton_Click(object sender, RoutedEventArgs e)
@@ -378,7 +361,7 @@ namespace SnDbSizeTesterApp
         {
             var size = await GetTempDbSizeInMbAsync().ConfigureAwait(false);
             var percent = await GetTempDbAllocatedPercentAsync().ConfigureAwait(false);
-            Print($"---- TempDb Size: {size},  allocated: {percent}%\r\n");
+            Log($"---- TempDb Size: {size},  allocated: {percent}%\r\n");
         }
 
         private void ClearLogButton_Click(object sender, RoutedEventArgs e)
@@ -400,7 +383,7 @@ namespace SnDbSizeTesterApp
             var size = await GetTempDbSizeInMbAsync();
             var percent = await GetTempDbAllocatedPercentAsync();
             ViewTempDbInfo(size, percent);
-            Print($"---- TempDb Size: {size},  allocated: {percent}%\r\n");
+            Log($"---- TempDb size: {size:F3} MB, fill: {percent:F1}%, peak: {_tempDbSizePeak:F3}");
             if (size < 30000.0d || percent < 50.0d)
                 return;
 
@@ -408,7 +391,7 @@ namespace SnDbSizeTesterApp
             size = await GetTempDbSizeInMbAsync().ConfigureAwait(false);
             percent = await GetTempDbAllocatedPercentAsync().ConfigureAwait(false);
             ViewTempDbInfo(size, percent);
-            Print($"---- TempDb Size: {size},  allocated: {percent}%\r\n");
+            Log($"---- TempDb size: {size:F3} MB, fill: {percent:F1}%, peak: {_tempDbSizePeak:F3}");
         }
 
         private void ViewTempDbInfo(double size, double percent)

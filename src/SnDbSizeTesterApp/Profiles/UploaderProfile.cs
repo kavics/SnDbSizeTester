@@ -26,15 +26,14 @@ namespace SnDbSizeTesterApp.Profiles
                 var stream = new MemoryStream(buffer);
                 
                 var start = DateTime.Now;
-                //Log("> Uploading...");
+                Log("> Uploading...");
                 var content = await Content.UploadAsync(root.Id, Guid.NewGuid().ToString(), stream).ConfigureAwait(false);
                 var duration = DateTime.Now - start;
-                //Log($"| Uploaded: {content.Id}. ({duration.TotalSeconds} sec)");
-                Log($"| Uploaded.");
+                Log($"| Uploaded: {content.Id}. ({duration.TotalSeconds} sec)");
             }
             catch (Exception e)
             {
-                Print(e);
+                LogError(e);
             }
 
         }

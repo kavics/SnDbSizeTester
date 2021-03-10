@@ -33,6 +33,11 @@ namespace SnDbSizeTesterApp.Profiles
         {
             _logAction(text);
         }
+        internal Action<Exception> _logErrorAction { get; set; }
+        protected void LogError(Exception error)
+        {
+            _logErrorAction(error);
+        }
         protected void Print(Exception e)
         {
             var sb = new StringBuilder();

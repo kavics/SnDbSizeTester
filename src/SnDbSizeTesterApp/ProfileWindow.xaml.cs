@@ -32,6 +32,7 @@ namespace SnDbSizeTesterApp
             _profile = profile;
             this.DataContext = profile;
             this.Title = _profile.Name;
+            ActionCountLabel.Content = "0";
         }
 
 
@@ -77,12 +78,18 @@ namespace SnDbSizeTesterApp
             _workingState = WorkingState.Initial;
         }
 
+        private int _actionCount;
         private async Task RunAsync()
         {
             while (true)
             {
-                if(_workingState == WorkingState.Running)
+                if (_workingState == WorkingState.Running)
+                {
                     await _profile.Action(CancellationToken.None).ConfigureAwait(false);
+#pragma warning disable CS4014
+                    Dispatcher.InvokeAsync(() => { ActionCountLabel.Content = ++_actionCount; });
+#pragma warning restore CS4014
+                }
 
                 if (!_profile.Recurring || _workingState == WorkingState.Initial)
                     break;

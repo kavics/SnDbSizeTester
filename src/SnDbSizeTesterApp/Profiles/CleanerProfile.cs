@@ -21,18 +21,15 @@ namespace SnDbSizeTesterApp.Profiles
                 var ids = result.Select(x => x.Id).ToArray();
                 var idstr = string.Join(", ", ids.Select(x => x.ToString()));
                 var start = DateTime.Now;
-                //Log($"> Cleaning: {idstr}");
-                Log($"> Cleaning...");
+                Log($"> Cleaning: {idstr}");
                 await Content.DeleteAsync(ids, true, cancellation);
                 var duration = DateTime.Now - start;
-                //Log($"| Cleaned: {idstr} ({duration.TotalSeconds} sec)");
-                Log($"| Cleaned.");
+                Log($"| Cleaned: {idstr} ({duration.TotalSeconds} sec)");
             }
             catch (Exception e)
             {
-                Print(e);
+                LogError(e);
             }
-
         }
     }
 }

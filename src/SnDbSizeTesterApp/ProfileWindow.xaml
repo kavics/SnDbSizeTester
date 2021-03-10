@@ -9,6 +9,7 @@
     <Grid>
         <Button x:Name="ControlButton" Content="Start" Margin="0,0,70,10" Height="20" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="55" Click="ControlButton_Click"/>
         <CheckBox Content="Recurring" IsChecked="{Binding Path=Recurring, Mode=TwoWay}" Margin="16,10,0,0" HorizontalAlignment="Left" Width="71" Click="CheckBox_Click" Height="15" VerticalAlignment="Top"/>
+        <Label x:Name="ActionCountLabel" HorizontalContentAlignment="Right" Content="ActionCountLabel" Margin="92,3,10,0" VerticalAlignment="Top"/>
         <Label Content="Wait (milliseconds):" Margin="12,30,0,0" HorizontalAlignment="Left" Width="114" Height="26" VerticalAlignment="Top"/>
         <TextBox Margin="126,34,0,0" Text="{Binding Path=WaitMilliseconds, Mode=TwoWay, FallbackValue=3500}"
                  IsEnabled="{Binding Path=Recurring}"
