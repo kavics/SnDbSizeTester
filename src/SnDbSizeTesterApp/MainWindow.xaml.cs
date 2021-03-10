@@ -143,7 +143,6 @@ namespace SnDbSizeTesterApp
                 ConnectButton.IsEnabled = true;
                 _dispatcherTimer.Start();
             });
-
         }
         private void UiResizeBars(DatabaseInfo dbInfo, DashboardData dashboardData)
         {
@@ -282,15 +281,14 @@ namespace SnDbSizeTesterApp
 
         private void ProfileWindow_Closed(object sender, EventArgs e)
         {
-            ForgetProfile((Window) sender);
+            ForgetProfile((ProfileWindow) sender);
         }
         private void CloseAllProfilesButton_Click(object sender, RoutedEventArgs e)
         {
             ForgetAllProfiles();
         }
 
-
-        private List<Window> _activeProfiles = new List<Window>();
+        private List<ProfileWindow> _activeProfileWindows = new List<ProfileWindow>();
         private void CreateProfile(string name)
         {
             Profile profile;
@@ -298,29 +296,44 @@ namespace SnDbSizeTesterApp
             {
                 case "Uploader": profile = new UploaderProfile(); break;
                 case "Cleaner": profile = new CleanerProfile(); break;
-                case "Editor": profile = new EditorProfile(); break;
+                case "Organizer": profile = new OrganizerProfile(); break;
                 case "Approver": profile = new ApproverProfile(); break;
                 //case "Profile5": profile = new Profile5(); break;
                 //case "Profile6": profile = new Profile6(); break;
                 default:
                     throw new ArgumentException("Unknown profile type: " + name);
             }
+
+            profile.Id = GetProfileId(profile);
             profile._logAction = Log;
             profile._logErrorAction = LogError;
 
             var window = new ProfileWindow(profile);
-            _activeProfiles.Add(window);
             window.Closed += ProfileWindow_Closed;
             window.Owner = this;
+            _activeProfileWindows.Add(window);
             window.Show();
         }
-        private void ForgetProfile(Window window)
+        private int GetProfileId(Profile profile)
         {
-            _activeProfiles.Remove(window);
+            var ids = _activeProfileWindows.Where(x => x.Profile.Name == profile.Name)
+                .Select(x => x.Profile.Id).ToArray();
+            if (ids.Length == 0)
+                return 1;
+
+            var max = ids.Max();
+            for (var id = 1; id < max; id++)
+                if (!ids.Contains(id))
+                    return id;
+            return max + 1;
+        }
+        private void ForgetProfile(ProfileWindow window)
+        {
+            _activeProfileWindows.Remove(window);
         }
         private void ForgetAllProfiles()
         {
-            foreach (var window in _activeProfiles.ToArray())
+            foreach (var window in _activeProfileWindows.ToArray())
                 window.Close();
         }
 

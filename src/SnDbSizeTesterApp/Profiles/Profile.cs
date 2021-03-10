@@ -12,6 +12,7 @@ namespace SnDbSizeTesterApp.Profiles
         public int WaitMilliseconds { get; set; } = 5000;
 
         public abstract string Name { get; }
+        public int Id { get; set; }
         public abstract Task Action(CancellationToken cancellation);
 
         protected async Task<Content> GetTestFolderAsync()

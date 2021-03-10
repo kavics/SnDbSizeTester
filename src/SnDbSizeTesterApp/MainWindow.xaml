@@ -33,12 +33,12 @@
 
         <Label Content="Profiles" HorizontalAlignment="Left" Margin="11,175,0,0" VerticalAlignment="Top" Width="74"/>
         <StackPanel Height="40" VerticalAlignment="Top" Margin="0,201,0,0" Orientation="Horizontal">
-            <Button Content="Uploader" Margin="10,4,0,4" Width="70" Click="ProfileButton_Click"/>
-            <Button Content="Cleaner"  Margin="10,4,0,4" Width="70" Click="ProfileButton_Click"/>
-            <Button Content="Editor"   Margin="10,4,0,4" Width="70" Click="ProfileButton_Click" IsEnabled="False"/>
-            <Button Content="Approver" Margin="10,4,0,4" Width="70" Click="ProfileButton_Click" IsEnabled="False"/>
-            <Button Content="Profile5" Margin="10,4,0,4" Width="70" Click="ProfileButton_Click" IsEnabled="False"/>
-            <Button Content="Profile6" Margin="10,4,0,4" Width="70" Click="ProfileButton_Click" IsEnabled="False"/>
+            <Button Content="Uploader"  Margin="10,4,0,4" Width="70" Click="ProfileButton_Click"/>
+            <Button Content="Cleaner"   Margin="10,4,0,4" Width="70" Click="ProfileButton_Click"/>
+            <Button Content="Organizer" Margin="10,4,0,4" Width="70" Click="ProfileButton_Click"/>
+            <Button Content="Approver"  Margin="10,4,0,4" Width="70" Click="ProfileButton_Click" IsEnabled="False"/>
+            <Button Content="Profile5"  Margin="10,4,0,4" Width="70" Click="ProfileButton_Click" IsEnabled="False"/>
+            <Button Content="Profile6"  Margin="10,4,0,4" Width="70" Click="ProfileButton_Click" IsEnabled="False"/>
         </StackPanel>
         <Button x:Name="CloseAllProfilesButton" Content="Kill All" HorizontalAlignment="Left" Margin="11,241,0,0" VerticalAlignment="Top" Width="54" Click="CloseAllProfilesButton_Click"/>
 

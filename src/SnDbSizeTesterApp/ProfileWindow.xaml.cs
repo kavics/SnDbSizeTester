@@ -24,17 +24,16 @@ namespace SnDbSizeTesterApp
 
         private WorkingState _workingState = WorkingState.Initial;
 
-        private Profile _profile;
+        public Profile Profile { get; }
 
         public ProfileWindow(Profile profile)
         {
             InitializeComponent();
-            _profile = profile;
+            Profile = profile;
             this.DataContext = profile;
-            this.Title = _profile.Name;
+            UiSetTitle("");
             ActionCountLabel.Content = "0";
         }
-
 
         private void ControlButton_Click(object sender, RoutedEventArgs e)
         {
@@ -43,7 +42,7 @@ namespace SnDbSizeTesterApp
                 case WorkingState.Initial:
                     ControlButton.Content = "Pause";
                     _workingState = WorkingState.Running;
-                    this.Title = _profile.Name + " (running)";
+                    UiSetTitle("(running)");
 #pragma warning disable 4014
                     RunAsync();
 #pragma warning restore 4014
@@ -51,12 +50,12 @@ namespace SnDbSizeTesterApp
                 case WorkingState.Running:
                     ControlButton.Content = "Continue";
                     _workingState = WorkingState.Paused;
-                    this.Title = _profile.Name + " (paused)";
+                    UiSetTitle("(paused)");
                     break;
                 case WorkingState.Paused:
                     ControlButton.Content = "Pause";
                     _workingState = WorkingState.Running;
-                    this.Title = _profile.Name + " (running)";
+                    UiSetTitle("(running)");
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -85,20 +84,20 @@ namespace SnDbSizeTesterApp
             {
                 if (_workingState == WorkingState.Running)
                 {
-                    await _profile.Action(CancellationToken.None).ConfigureAwait(false);
+                    await Profile.Action(CancellationToken.None).ConfigureAwait(false);
 #pragma warning disable CS4014
                     Dispatcher.InvokeAsync(() => { ActionCountLabel.Content = ++_actionCount; });
 #pragma warning restore CS4014
                 }
 
-                if (!_profile.Recurring || _workingState == WorkingState.Initial)
+                if (!Profile.Recurring || _workingState == WorkingState.Initial)
                     break;
 
-                var delay = _profile.WaitMilliseconds;
+                var delay = Profile.WaitMilliseconds;
                 if (delay > 0)
                 {
                     await Task.Delay(delay).ConfigureAwait(false);
-                    if (!_profile.Recurring || _workingState == WorkingState.Initial)
+                    if (!Profile.Recurring || _workingState == WorkingState.Initial)
                         break;
                 }
             }
@@ -107,8 +106,13 @@ namespace SnDbSizeTesterApp
             {
                 ControlButton.Content = "Start";
                 _workingState = WorkingState.Initial;
-                this.Title = _profile.Name + " (done)";
+                UiSetTitle(" (done)");
             });
+        }
+
+        private void UiSetTitle(string msg)
+        {
+            this.Title = $"{Profile.Name}-{Profile.Id} {msg}";
         }
     }
 }
