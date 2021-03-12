@@ -53,6 +53,37 @@ namespace SnDbSizeTesterApp
             this.DataContext = _chartViewModel;
 
             InitializeChartDataFile();
+
+            InitializeClients();
+            InitializeUrlComboBox();
+        }
+
+        private ClientInfo[] _clients = new ClientInfo[0];
+        private void InitializeClients()
+        {
+            try
+            {
+                var asm = Assembly.GetExecutingAssembly();
+                var asmPath = asm.Location;
+                var path = Path.Combine(Path.GetDirectoryName(asmPath), "App_Data\\clients.data.json");
+                using (var reader = new StreamReader(path))
+                {
+                    //var src = reader.ReadToEnd();
+                    using(var jsonReader = new JsonTextReader(reader))
+                        _clients = JsonSerializer.Create().Deserialize<ClientInfo[]>(jsonReader);
+                }
+            }
+            catch (Exception e)
+            {
+                LogError(e);
+            }
+        }
+        private void InitializeUrlComboBox()
+        {
+            UrlComboBox.Items.Clear();
+            foreach (var item in _clients)
+                UrlComboBox.Items.Add(item.Url);
+            UrlComboBox.SelectedIndex = 0;
         }
 
         private int _dispatcherTimerTickCount = 0;
@@ -83,7 +114,24 @@ namespace SnDbSizeTesterApp
 
             /* ------------------------------------------------------------- */
 
-            var connPrms = new ConnectionParameters {Url = url, ClientId = "", Secret = ""};
+            var client = _clients.FirstOrDefault(x => x.Url.Equals(url, StringComparison.OrdinalIgnoreCase));
+
+            var connPrms = client == null
+                ? new ConnectionParameters
+                {
+                    Url = url,
+                    ClientId = "",
+                    Secret = "",
+                    ConnectionString = ""
+                }
+                : new ConnectionParameters
+                {
+                    Url = url,
+                    ClientId = client.ClientId,
+                    Secret = client.Secret,
+                    ConnectionString = client.ConnectionStrting
+                };
+
             var window = new LoginWindow(connPrms);
             window.Owner = this;
             var result = window.ShowDialog();
@@ -195,7 +243,7 @@ namespace SnDbSizeTesterApp
         {
             var asm = Assembly.GetExecutingAssembly();
             var asmPath = asm.Location;
-            var dir = Path.Combine(Path.GetDirectoryName(asmPath), "ChartData");
+            var dir = Path.Combine(Path.GetDirectoryName(asmPath), "App_Data\\ChartData");
             if (!Directory.Exists(dir))
                 Directory.CreateDirectory(dir);
             _chartDataFilePath = Path.Combine(dir, "current-chart.txt");

@@ -15,10 +15,7 @@
         <!--<TextBox x:Name="ConnectionTextBox" Margin="142,10,75,0" Padding="2,4,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="25" Text="https://netcore-service.test.sensenet.com"/>-->
         <!--<TextBox x:Name="ConnectionTextBox" Margin="142,10,75,0" Padding="2,4,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="25" Text="https://tlogtest.sensenet.cloud"/>-->
         <ComboBox x:Name="UrlComboBox" HorizontalAlignment="Left" Margin="142,10,0,0" VerticalAlignment="Top" Width="273" IsEditable="True" Height="25">
-            <ComboBoxItem IsSelected="True" Content="https://localhost:44362" />
-            <ComboBoxItem IsSelected="False" Content="https://tlogtest.sensenet.cloud" />
-            <ComboBoxItem IsSelected="False" Content="https://tlogtest2.sensenet.cloud" />
-            <ComboBoxItem IsSelected="False" Content="https://netcore-service.test.sensenet.com" />
+            <ComboBoxItem IsSelected="True" Content="https://asdf" />
         </ComboBox>
         <Button x:Name="ConnectButton" Content="Connect" Margin="0,10,10,0" VerticalAlignment="Top" Height="25" FontWeight="Bold" Click="ConnectButton_Click" HorizontalAlignment="Right" Width="60"/>
         <Label x:Name="PlanLabel" Content="Plan: ?" Margin="10,40,10,0" VerticalAlignment="Top" Height="25"/>
