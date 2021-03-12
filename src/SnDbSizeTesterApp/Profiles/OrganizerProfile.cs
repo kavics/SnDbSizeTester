@@ -50,7 +50,11 @@ namespace SnDbSizeTesterApp.Profiles
 
             var tasks = new Task<Content>[5];
             for (int i = 0; i < tasks.Length; i++)
+            {
+                if (i > 0)
+                    await Task.Delay(250); // avoid exceeding the request/sec limitation.
                 tasks[i] = UploaderProfile.UploadAsync(source.Id, "File-" + (i + 1));
+            }
             await Task.WhenAll(tasks);
 
             return source;
@@ -62,7 +66,7 @@ namespace SnDbSizeTesterApp.Profiles
             var content = await Content.LoadAsync(path).ConfigureAwait(false);
             if (content == null)
             {
-                content = Content.CreateNew(parentPath, "SystemFolder", name);
+                content = Content.CreateNew(parentPath, "Folder", name);
                 await content.SaveAsync().ConfigureAwait(false);
             }
             return content;
@@ -71,7 +75,7 @@ namespace SnDbSizeTesterApp.Profiles
 
         private async Task<Content> CreateFolderAsync()
         {
-            var folder = Content.CreateNew("/Root/Content/UploadTests", "SystemFolder", Guid.NewGuid().ToString());
+            var folder = Content.CreateNew("/Root/Content/UploadTests", "Folder", Guid.NewGuid().ToString());
             await folder.SaveAsync().ConfigureAwait(false);
             return folder;
         }

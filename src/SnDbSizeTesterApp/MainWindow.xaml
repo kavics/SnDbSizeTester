@@ -44,6 +44,7 @@
             <Button Content="Profile6"  Margin="10,4,0,4" Width="70" Click="ProfileButton_Click" IsEnabled="False"/>
         </StackPanel>
         <Button x:Name="CloseAllProfilesButton" Content="Kill All" HorizontalAlignment="Left" Margin="12,329,0,0" VerticalAlignment="Top" Width="54" Click="CloseAllProfilesButton_Click"/>
+        <Button x:Name="CleanupButton" Content="Cleanup server" HorizontalAlignment="Left" Margin="90,329,0,0" VerticalAlignment="Top" Width="100" Click="CleanupButton_Click"/>
 
         <oxy:PlotView Model="{Binding Model}" Margin="11,356,9,0" Height="332" VerticalAlignment="Top" />
 

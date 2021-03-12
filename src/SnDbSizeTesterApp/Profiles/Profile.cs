@@ -22,7 +22,7 @@ namespace SnDbSizeTesterApp.Profiles
             var uploadFolder = await Content.LoadAsync(uploadRootPath).ConfigureAwait(false);
             if (uploadFolder == null)
             {
-                uploadFolder = Content.CreateNew("/Root/Content", "SystemFolder", "UploadTests");
+                uploadFolder = Content.CreateNew("/Root/Content", "DocumentLibrary", "UploadTests");
                 await uploadFolder.SaveAsync().ConfigureAwait(false);
             }
 
