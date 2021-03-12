@@ -4,6 +4,7 @@ using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -279,6 +280,19 @@ namespace SnDbSizeTesterApp
         private void CloseAllProfilesButton_Click(object sender, RoutedEventArgs e)
         {
             ForgetAllProfiles();
+        }
+        private void CleanupButton_Click(object sender, RoutedEventArgs e)
+        {
+#pragma warning disable 4014
+            Cleanup();
+#pragma warning restore 4014
+        }
+
+        private async Task Cleanup()
+        {
+            await Dispatcher.InvokeAsync(() => { CleanupButton.IsEnabled = false; });
+            await SenseNet.Client.Content.DeleteAsync("/Root/Content/UploadTests", true, CancellationToken.None);
+            await Dispatcher.InvokeAsync(() => { CleanupButton.IsEnabled = true; });
         }
 
         private List<ProfileWindow> _activeProfileWindows = new List<ProfileWindow>();
