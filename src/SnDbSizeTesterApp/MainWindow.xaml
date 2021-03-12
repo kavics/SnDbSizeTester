@@ -6,7 +6,7 @@
         xmlns:oxy="clr-namespace:OxyPlot.Wpf;assembly=OxyPlot.Wpf" 
         xmlns:local="clr-namespace:SnDbSizeTesterApp"
         mc:Ignorable="d"
-        Title="MainWindow" Height="906" Width="500" Closing="Window_Closing">
+        Title="MainWindow" Height="981" Width="500" Closing="Window_Closing">
     <Window.DataContext>
         <local:MainViewModel />
     </Window.DataContext>
@@ -23,16 +23,19 @@
         <Button x:Name="ConnectButton" Content="Connect" Margin="0,10,10,0" VerticalAlignment="Top" Height="25" FontWeight="Bold" Click="ConnectButton_Click" HorizontalAlignment="Right" Width="60"/>
         <Label x:Name="PlanLabel" Content="Plan: ?" Margin="10,40,10,0" VerticalAlignment="Top" Height="25"/>
         <ProgressBar x:Name="DataBar" HorizontalAlignment="Left" Height="26" Margin="10,65,0,0" VerticalAlignment="Top" Width="400" Value="606279" Maximum="1048576"/>
-        <Label x:Name="DataBarLabel" Content="Data" HorizontalAlignment="Left" Margin="10,65,0,0" VerticalAlignment="Top" Width="161"/>
-        <ProgressBar x:Name="LogPeakBar" HorizontalAlignment="Left" Height="26" Margin="10,96,0,0" VerticalAlignment="Top" Width="400" Value="606279" Maximum="1048576" Foreground="#FFF7C004" Background="{x:Null}"/>
+        <Label x:Name="DataBarLabel" Content="Data" HorizontalAlignment="Left" Margin="10,65,0,0" VerticalAlignment="Top" Width="300"/>
+        <ProgressBar x:Name="LogPeakBar" HorizontalAlignment="Left" Height="26" Margin="10,96,0,0" VerticalAlignment="Top" Width="400" Value="606279" Maximum="1048576" Foreground="#FFF7C004"/>
         <ProgressBar x:Name="LogBar" HorizontalAlignment="Left" Height="26" Margin="10,96,0,0" VerticalAlignment="Top" Width="400" Value="506279" Maximum="1048576" Foreground="#FFC79B07" Background="{x:Null}"/>
-        <Label x:Name="LogBarLabel" Content="TLog" HorizontalAlignment="Left" Margin="10,96,0,0" VerticalAlignment="Top" Width="161"/>
-        <ProgressBar x:Name="ContentBar" HorizontalAlignment="Left" Height="16" Margin="10,127,0,0" VerticalAlignment="Top" Width="150"/>
-        <Label x:Name="ContentBarLabel" Content="Content" Padding="4,0,0,0" HorizontalAlignment="Left" Margin="10,127,0,0" VerticalAlignment="Top" Width="150" Height="16" FontSize="10"/>
-        <TextBox x:Name="TempDbInfoTextBox" HorizontalAlignment="Left" Margin="67,148,0,0" Text="TempDbInfoTextBox" TextWrapping="Wrap" VerticalAlignment="Top" Width="343"/>
+        <Label x:Name="LogBarLabel" Content="TLog" HorizontalAlignment="Left" Margin="10,96,0,0" VerticalAlignment="Top" Width="300"/>
+        <ProgressBar x:Name="ContentBar" HorizontalAlignment="Left" Height="26" Margin="10,127,0,0" VerticalAlignment="Top" Width="400" Value="250" Maximum="500" Foreground="#FF6699FF"/>
+        <Label x:Name="ContentBarLabel" Content="Content" HorizontalAlignment="Left" Margin="10,127,0,0" VerticalAlignment="Top" Width="300" Height="26"/>
+        <Label Content="Server:" HorizontalAlignment="Left" Margin="10,164,0,0" VerticalAlignment="Top"/>
+        <TextBox x:Name="DatabaseServerTextBox" Margin="67,167,10,0" Text="DatabaseServerTextBox" TextWrapping="Wrap" VerticalAlignment="Top"/>
+        <Label Content="Volume:" HorizontalAlignment="Left" Margin="10,186,0,0" VerticalAlignment="Top"/>
+        <TextBox x:Name="VolumeInfoTextBox" Margin="67,190,10,0" Text="VolumeInfoTextBox" TextWrapping="Wrap" VerticalAlignment="Top"/>
 
-        <Label Content="Profiles" HorizontalAlignment="Left" Margin="11,175,0,0" VerticalAlignment="Top" Width="74"/>
-        <StackPanel Height="40" VerticalAlignment="Top" Margin="0,201,0,0" Orientation="Horizontal">
+        <Label Content="Profiles" HorizontalAlignment="Left" Margin="11,258,0,0" VerticalAlignment="Top" Width="74"/>
+        <StackPanel Height="40" VerticalAlignment="Top" Margin="0,284,0,0" Orientation="Horizontal">
             <Button Content="Uploader"  Margin="10,4,0,4" Width="70" Click="ProfileButton_Click"/>
             <Button Content="Cleaner"   Margin="10,4,0,4" Width="70" Click="ProfileButton_Click"/>
             <Button Content="Organizer" Margin="10,4,0,4" Width="70" Click="ProfileButton_Click"/>
@@ -40,15 +43,13 @@
             <Button Content="Profile5"  Margin="10,4,0,4" Width="70" Click="ProfileButton_Click" IsEnabled="False"/>
             <Button Content="Profile6"  Margin="10,4,0,4" Width="70" Click="ProfileButton_Click" IsEnabled="False"/>
         </StackPanel>
-        <Button x:Name="CloseAllProfilesButton" Content="Kill All" HorizontalAlignment="Left" Margin="11,241,0,0" VerticalAlignment="Top" Width="54" Click="CloseAllProfilesButton_Click"/>
+        <Button x:Name="CloseAllProfilesButton" Content="Kill All" HorizontalAlignment="Left" Margin="12,329,0,0" VerticalAlignment="Top" Width="54" Click="CloseAllProfilesButton_Click"/>
 
-        <oxy:PlotView Model="{Binding Model}" Margin="10,279,10,0" Height="332" VerticalAlignment="Top" />
+        <oxy:PlotView Model="{Binding Model}" Margin="11,356,9,0" Height="332" VerticalAlignment="Top" />
 
-        <TextBox x:Name="LogTextBox" Margin="10,636,10,10" Text="LogTextBox" TextWrapping="NoWrap" HorizontalScrollBarVisibility="Visible"
+        <TextBox x:Name="LogTextBox" Margin="10,730,10,10" Text="LogTextBox" TextWrapping="NoWrap" HorizontalScrollBarVisibility="Visible"
                  VerticalScrollBarVisibility="Visible"/>
-        <Button x:Name="DbActionButton" Content="EMERGENCY BUTTON" HorizontalAlignment="Left" Margin="233,243,0,0" VerticalAlignment="Top" Height="25" Width="131" Click="DbActionButton_Click"/>
-        <Button x:Name="DbTestButton" Content="Test DB connection" HorizontalAlignment="Left" Margin="369,243,0,0" VerticalAlignment="Top" Width="113" Height="25" Click="DbTestButton_Click"/>
-        <Button x:Name="ClearLogButton" Content="Clear" Margin="0,616,10,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="31" Click="ClearLogButton_Click"/>
-        <Label Content="TempDb:" HorizontalAlignment="Left" Margin="10,144,0,0" VerticalAlignment="Top"/>
+        <Button x:Name="DbActionButton" Content="EMERGENCY BUTTON" HorizontalAlignment="Left" Margin="234,331,0,0" VerticalAlignment="Top" Height="25" Width="131" Click="DbActionButton_Click"/>
+        <Button x:Name="ClearLogButton" Content="Clear" Margin="0,710,10,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="31" Click="ClearLogButton_Click"/>
     </Grid>
 </Window>

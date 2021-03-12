@@ -15,7 +15,7 @@ namespace SnDbSizeTesterApp.Profiles
             try
             {
                 var root = await base.GetTestFolderAsync().ConfigureAwait(false);
-                var query = $"InFolder:'{root.Path}' .AUTOFILTERS:OFF .SORT:Id .TOP:10";
+                var query = $"+TypeIs:File +InFolder:'{root.Path}' .AUTOFILTERS:OFF .SORT:Id .TOP:10";
                 var select = new[] {"Id", "ParentId", "Path", "Name"};
                 var result = await Content.QueryAsync(query, select).ConfigureAwait(false);
                 var ids = result.Select(x => x.Id).ToArray();

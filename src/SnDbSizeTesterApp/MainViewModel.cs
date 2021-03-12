@@ -17,6 +17,7 @@ namespace SnDbSizeTesterApp
         private Random _rnd = new Random();
         private LineSeries[] _series;
         private double[][] _data;
+        private static readonly int Width = 100;
 
         /// <summary>
         /// Gets the plot model.
@@ -29,9 +30,9 @@ namespace SnDbSizeTesterApp
         public MainViewModel()
         {
             // Create initial data
-            _data = new [] {new double[100], new double[100], new double[100]};
-            for (int i = 0; i < 3; i++)
-                for (int j = 0; j < 100; j++)
+            _data = new [] {new double[Width], new double[Width], new double[Width], new double[Width] };
+            for (int i = 0; i < 4; i++)
+                for (int j = 0; j < Width; j++)
                     _data[i][j] = _rnd.NextDouble() * 4.0 + i * 5;
 
             // Create line series with random values
@@ -40,9 +41,11 @@ namespace SnDbSizeTesterApp
                 new LineSeries {Title = "Data %", MarkerType = MarkerType.None},
                 new LineSeries {Title = "Log %", MarkerType = MarkerType.None},
                 new LineSeries {Title = "Temp %", MarkerType = MarkerType.None},
+                new LineSeries {Title = "Content %", MarkerType = MarkerType.None,
+                    Color = OxyColor.FromRgb(0x66, 0x99, 0xFF)},
             };
-            for (int i = 0; i < 3; i++)
-                for (int j = 0; j < 100; j++)
+            for (int i = 0; i < _series.Length; i++)
+                for (int j = 0; j < Width; j++)
                     _series[i].Points.Add(new DataPoint(j, _data[i][j]));
 
             // Create the plot model
@@ -50,11 +53,12 @@ namespace SnDbSizeTesterApp
             tmp.Series.Add(_series[0]);
             tmp.Series.Add(_series[1]);
             tmp.Series.Add(_series[2]);
+            tmp.Series.Add(_series[3]);
 
             // Axes are created automatically if they are not defined
             tmp.Axes.Add(new LinearAxis
             {
-                Position = AxisPosition.Bottom, Minimum = 0, Maximum = 100,
+                Position = AxisPosition.Bottom, Minimum = 0, Maximum = Width,
                 /*MajorGridlineStyle = LineStyle.Dot, MajorGridlineColor = OxyColor.FromRgb(0x80, 0x80, 0x80*/
             });
             tmp.Axes.Add(new LinearAxis { Position = AxisPosition.Left, Minimum = 0, Maximum = 100,
@@ -76,7 +80,7 @@ namespace SnDbSizeTesterApp
                 {
                     var p = _series[i].Points;
                     // Scroll left
-                    for (int x = 1; x < 100; x++)
+                    for (int x = 1; x < Width; x++)
                         p[x - 1] = new DataPoint(x - 1, p[x].Y);
                     // Add new point
                     p[99] = new DataPoint(99, values[i]);

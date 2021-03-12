@@ -4,23 +4,12 @@ using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using System.Windows.Threading;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
-using OxyPlot;
-using OxyPlot.Series;
 using SenseNet.Client;
 using SenseNet.Client.Authentication;
 using SenseNet.Diagnostics;
@@ -55,7 +44,8 @@ namespace SnDbSizeTesterApp
             _dispatcherTimer.Tick += DispatcherTimer_Tick;
 
             PlanLabel.Content = "Plan: ?";
-            TempDbInfoTextBox.Text = "";
+            DatabaseServerTextBox.Text = "";
+            VolumeInfoTextBox.Text = "";
             LogTextBox.Text = "";
 
             _chartViewModel =  new MainViewModel();
@@ -69,7 +59,7 @@ namespace SnDbSizeTesterApp
         {
 #pragma warning disable CS4014
             RefreshBarsAsync();
-            if((++_dispatcherTimerTickCount % 3) == 0)
+            if((++_dispatcherTimerTickCount % 5) == 0)
                 PreventDatabaseSizeOverflowAsync();
 #pragma warning restore CS4014
         }
@@ -149,9 +139,9 @@ namespace SnDbSizeTesterApp
             var dataLimit = dbInfo.Database.DataSize;
             var logLimit = dbInfo.Database.LogSize;
 
-            DataBar.Width = 400.0;
-            LogBar.Width = logLimit * 400.0 / dataLimit;
-            LogPeakBar.Width = LogBar.Width;
+            //DataBar.Width = 400.0;
+            //LogBar.Width = logLimit * 400.0 / dataLimit;
+            //LogPeakBar.Width = LogBar.Width;
 
             DataBarLabel.Content = $"Data ({dataLimit / 1024.0} MB)";
             LogBarLabel.Content = $"TLog ({logLimit / 1024.0} MB)";
@@ -162,7 +152,8 @@ namespace SnDbSizeTesterApp
 
             LogPeakBar.Value = 0.0;
 
-            ContentBar.Maximum = dashboardData.Subscription.Plan.Limitations.ContentCount;
+            _contentMaxCount = dashboardData.Subscription.Plan.Limitations.ContentCount;
+            ContentBar.Maximum = _contentMaxCount;
         }
 
 
@@ -183,10 +174,10 @@ namespace SnDbSizeTesterApp
             var logPercent = dbInfo.Database.UsedLogPercent;
             var tempPercent = await GetTempDbAllocatedPercentAsync().ConfigureAwait(false);
             _chartViewModel.Advance(new[]
-                {dataPercent, logPercent, tempPercent});
+                {dataPercent, logPercent, tempPercent, _contentPercent});
 
 #pragma warning disable CS4014
-            WriteChartDataToFile(dataPercent, logPercent, tempPercent);
+            WriteChartDataToFile(dataPercent, logPercent, tempPercent, _contentPercent);
 
             Dispatcher.InvokeAsync(() =>
             {
@@ -207,18 +198,18 @@ namespace SnDbSizeTesterApp
             if (!Directory.Exists(dir))
                 Directory.CreateDirectory(dir);
             _chartDataFilePath = Path.Combine(dir, "current-chart.txt");
-            //if (File.Exists(_chartDataFilePath))
-            //    File.Delete(_chartDataFilePath);
             using (var writer = new StreamWriter(_chartDataFilePath, false))
-                writer.WriteLine("Data\tLog\tTemp");
+                writer.WriteLine("Data\tLog\tTemp\tContent");
         }
-        private async Task WriteChartDataToFile(float dataPercent, float logPercent, double tempPercent)
+        private async Task WriteChartDataToFile(float dataPercent, float logPercent, double tempPercent, double contentPercent)
         {
             using (var writer = new StreamWriter(_chartDataFilePath, true))
-                await writer.WriteLineAsync($"{dataPercent}\t{logPercent}\t{tempPercent}");
+                await writer.WriteLineAsync($"{dataPercent}\t{logPercent}\t{tempPercent}\t{contentPercent}");
         }
 
         private int _refreshBarsByDatabaseUsageCallCounter;
+        private int _contentMaxCount;
+        private double _contentPercent = 0.0d;
         private async Task RefreshBarsByDatabaseUsageAsync()
         {
             if (++_refreshBarsByDatabaseUsageCallCounter % 3 != 1)
@@ -226,11 +217,13 @@ namespace SnDbSizeTesterApp
 
             var dbUsage = await GetDatabaseUsageAsync().ConfigureAwait(false);
             var contentCount = dbUsage.Content.Count;
+            _contentPercent = contentCount * 100.0d / _contentMaxCount;
+
 #pragma warning disable CS4014
             Dispatcher.InvokeAsync(() =>
             {
                 ContentBar.Value = contentCount;
-                ContentBarLabel.Content = $"Content: {contentCount}";
+                ContentBarLabel.Content = $"Content: {contentCount} / {_contentMaxCount}";
             });
 #pragma warning restore CS4014
         }
@@ -346,13 +339,10 @@ namespace SnDbSizeTesterApp
             SnTrace.WriteError(e.ToString());
             Print(true, false, e.Message);
         }
-        private void LogToDisplay(string msg)
-        {
-            Print(true, true, msg);
-        }
         private void Print(bool toDisplay, bool toTrace, string text)
         {
-            SnTrace.Write(text);
+            if(toTrace)
+                SnTrace.Write(text);
             if(toDisplay)
             {
                 LogTextBox.Dispatcher.InvokeAsync(() =>
@@ -361,20 +351,6 @@ namespace SnDbSizeTesterApp
                     LogTextBox.ScrollToEnd();
                 });
             }
-        }
-
-        private void DbTestButton_Click(object sender, RoutedEventArgs e)
-        {
-#pragma warning disable 4014
-            DbTestAsync();
-#pragma warning restore 4014
-        }
-
-        private async Task DbTestAsync()
-        {
-            var size = await GetTempDbSizeInMbAsync().ConfigureAwait(false);
-            var percent = await GetTempDbAllocatedPercentAsync().ConfigureAwait(false);
-            Log($"---- TempDb Size: {size},  allocated: {percent}%\r\n");
         }
 
         private void ClearLogButton_Click(object sender, RoutedEventArgs e)
@@ -389,59 +365,101 @@ namespace SnDbSizeTesterApp
 #pragma warning restore 4014
         }
 
-        private double _tempDbSizePeak = 0.0d;
         private async Task PreventDatabaseSizeOverflowAsync()
         {
             Log("---- Checking DB size...");
-            var size = await GetTempDbSizeInMbAsync();
-            var percent = await GetTempDbAllocatedPercentAsync();
-            ViewTempDbInfo(size, percent);
-            Log($"---- TempDb size: {size:F3} MB, fill: {percent:F1}%, peak: {_tempDbSizePeak:F3}");
-            if (size < 30000.0d || percent < 50.0d)
+            var volumeInfo = await GetDatabaseVolumeInfoAsync();
+            ViewTempDbInfo(volumeInfo);
+            Log($"---- Volume size: {volumeInfo.TempDbSizeKb / 1024.0:F3} MB, fill: {volumeInfo.TempDbFillPercent:F1}%," +
+                $" peak: {_tempDbSizePeak:F3}, Disk: {volumeInfo.DiskSizeBytes / 1024.0 / 1024.0:F2} " +
+                $"({volumeInfo.DiskFreeBytes * 100.0 / volumeInfo.DiskSizeBytes:F1}%)");
+            if (volumeInfo.TempDbSizeKb/1024.0d < 30000.0d || volumeInfo.TempDbFillPercent < 50.0d)
                 return;
 
             await EmergencyActionAsync().ConfigureAwait(false);
-            size = await GetTempDbSizeInMbAsync().ConfigureAwait(false);
-            percent = await GetTempDbAllocatedPercentAsync().ConfigureAwait(false);
-            ViewTempDbInfo(size, percent);
-            Log($"---- TempDb size: {size:F3} MB, fill: {percent:F1}%, peak: {_tempDbSizePeak:F3}");
+            volumeInfo = await GetDatabaseVolumeInfoAsync();
+            ViewTempDbInfo(volumeInfo);
+            Log($"---- Volume size: {volumeInfo.TempDbSizeKb / 1024.0:F3} MB, fill: {volumeInfo.TempDbFillPercent:F1}%," +
+                $" peak: {_tempDbSizePeak:F3}, Disk: {volumeInfo.DiskSizeBytes / 1024.0 / 1024.0:F2} " +
+                $"({volumeInfo.DiskFreeBytes * 100.0 / volumeInfo.DiskSizeBytes:F1}%)");
         }
 
-        private void ViewTempDbInfo(double size, double percent)
+        private double _tempDbSizePeak = 0.0d;
+        private void ViewTempDbInfo(DatabaseVolumeInfo volumeInfo)
         {
-            if (size > _tempDbSizePeak)
-                _tempDbSizePeak = size;
+            if (volumeInfo.TempDbSizeKb / 1024.0 > _tempDbSizePeak)
+                _tempDbSizePeak = volumeInfo.TempDbSizeKb / 1024.0;
 
             Dispatcher.InvokeAsync(() =>
             {
-                TempDbInfoTextBox.Text = $"size: {size:F3} MB, fill: {percent:F1}%, peak: {_tempDbSizePeak:F3}";
+                DatabaseServerTextBox.Text = volumeInfo.ServerName;
+                VolumeInfoTextBox.Text = $"size: {volumeInfo.TempDbSizeKb/1024.0:F3} MB, fill: {volumeInfo.TempDbFillPercent:F1}%, peak: {_tempDbSizePeak:F3}, Disk: {volumeInfo.DiskSizeBytes/1024.0/1024.0:F2} ({volumeInfo.DiskFreeBytes*100.0/volumeInfo.DiskSizeBytes:F1}%)";
             });
         }
 
         private async Task<double> GetTempDbAllocatedPercentAsync()
         {
-            using (var cn = new SqlConnection(_connectionString))
+            try
             {
-                cn.Open();
-                using (var cmd = new SqlCommand(@"SELECT CONVERT(real, 
+                using (var cn = new SqlConnection(_connectionString))
+                {
+                    cn.Open();
+                    using (var cmd = new SqlCommand(@"SELECT CONVERT(real, 
 FORMAT(SUM(allocated_extent_page_count) * 100.0 / (SUM(unallocated_extent_page_count) + SUM(allocated_extent_page_count)), 'N2')) [Temp_P]
 	FROM tempdb.sys.dm_db_file_space_usage;
 ", cn))
-                {
-                    return Convert.ToDouble(await cmd.ExecuteScalarAsync());
+                    {
+                        return Convert.ToDouble(await cmd.ExecuteScalarAsync());
+                    }
                 }
             }
-        }
-        private async Task<double> GetTempDbSizeInMbAsync()
-        {
-            using (var cn = new SqlConnection(_connectionString))
+            catch (Exception e)
             {
-                cn.Open();
-                using (var cmd = new SqlCommand(
-                    @"SELECT SUM(size)/128 AS [Total database size (MB)] FROM tempdb.sys.database_files", cn))
+                LogError(e);
+                throw;
+            }
+        }
+
+        private string _getDatabaseVolumeInfoScript = @"-- GetDatabaseVolumeInfo
+USE [tempdb]
+DECLARE @DiskSize bigint DECLARE @DiskFree bigint
+SELECT @DiskSize = total_bytes, @DiskFree = available_bytes from sys.dm_os_volume_stats(DB_ID(), 1)
+SELECT
+	@@SERVERNAME [ServerName], DB_ID() [DbId], DB_NAME() [DbName], 
+	(SELECT SUM(allocated_extent_page_count) * 100.0 / (SUM(unallocated_extent_page_count) + SUM(allocated_extent_page_count))
+		FROM tempdb.sys.dm_db_file_space_usage) [TempDbFill_Percent],
+	(SELECT SUM(size) * 8 FROM tempdb.sys.database_files) [TempDbSize_KB],
+	@DiskSize [DiskSize_B], @DiskFree [DiskFree_B]
+";
+        private async Task<DatabaseVolumeInfo> GetDatabaseVolumeInfoAsync()
+        {
+            try
+            {
+                using (var cn = new SqlConnection(_connectionString))
                 {
-                    return Convert.ToDouble(await cmd.ExecuteScalarAsync());
+                    cn.Open();
+                    using (var cmd = new SqlCommand(_getDatabaseVolumeInfoScript, cn))
+                    {
+                        using (var reader = await cmd.ExecuteReaderAsync())
+                        {
+                            await reader.ReadAsync();
+                            return new DatabaseVolumeInfo
+                            {
+                                ServerName = reader.GetString(reader.GetOrdinal("ServerName")),
+                                DatabaseName = reader.GetString(reader.GetOrdinal("DbName")),
+                                TempDbFillPercent = Convert.ToDouble(reader.GetDecimal(reader.GetOrdinal("TempDbFill_Percent"))),
+                                TempDbSizeKb = reader.GetInt32(reader.GetOrdinal("TempDbSize_KB")),
+                                DiskSizeBytes = reader.GetInt64(reader.GetOrdinal("DiskSize_B")),
+                                DiskFreeBytes = reader.GetInt64(reader.GetOrdinal("DiskFree_B")),
+                            };
+                        }
+                    }
                 }
+            }
+            catch (Exception e)
+            {
+                LogError(e);
+                throw;
             }
         }
         private async Task EmergencyActionAsync()
